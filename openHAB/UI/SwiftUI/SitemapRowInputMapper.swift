@@ -31,7 +31,9 @@ enum SitemapRowInputMapper {
     }
 
     static func map(widget: OpenHABWidget, rowID: RowID) -> SitemapRowInput {
-        if let input = LinkedPageRowInput.from(widget: widget) {
+        let kind = widget.renderingKind
+        let isMediaKind = kind == .image || kind == .chart || kind == .video || kind == .webview || kind == .mapview
+        if !isMediaKind, let input = LinkedPageRowInput.from(widget: widget) {
             return .linked(rowID, input)
         }
 

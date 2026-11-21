@@ -12,6 +12,7 @@
 import Foundation
 import OpenHABCore
 
+// swiftformat:disable:next redundantSendable
 struct SnapshotRowInputBuildResult: Sendable {
     let inputs: [SitemapRowInput]
     let rowIDs: [RowID]
@@ -19,7 +20,7 @@ struct SnapshotRowInputBuildResult: Sendable {
     let reusedInputCount: Int
 }
 
-struct WidgetLinkedPageSnapshot: Sendable {
+struct WidgetLinkedPageSnapshot {
     let link: String
     let title: String
 }
@@ -96,6 +97,7 @@ enum SitemapRowInputSnapshotBuilder {
     }
 }
 
+// swiftformat:disable:next redundantSendable
 struct WidgetMappingSnapshot: Sendable {
     let widgetId: String
     let label: String
@@ -255,7 +257,9 @@ extension WidgetMappingSnapshot {
         OpenHABWidget.LabelSource(rawValue: labelSourceRawValue) ?? .unknown
     }
 
-    var hasLinkedPage: Bool { linkedPage != nil }
+    var hasLinkedPage: Bool {
+        linkedPage != nil
+    }
 
     var mediaImageDescriptor: WidgetMediaImageDescriptor {
         let itemPayload: WidgetMediaItemPayloadSnapshot = if let item {
@@ -339,7 +343,9 @@ private extension OpenHABWidgetMapping {
 
 extension SitemapRowInputMapper {
     static func map(snapshot: WidgetMappingSnapshot, rowID: RowID) -> SitemapRowInput {
-        if let input = linkedPageRowInput(from: snapshot) {
+        let kind = snapshot.renderingKind
+        let isMediaKind = kind == .image || kind == .chart || kind == .video || kind == .webview || kind == .mapview
+        if !isMediaKind, let input = linkedPageRowInput(from: snapshot) {
             return .linked(rowID, input)
         }
 
@@ -499,7 +505,7 @@ extension SitemapRowInputMapper {
             labelColor: snapshot.labelColor,
             valueColor: snapshot.valueColor,
             readOnly: snapshot.readOnly,
-            inputHintRawValue: snapshot.inputHintRawValue,
+            inputHintRawValue: InputRowInput.resolvedInputHintRawValue(snapshot.inputHintRawValue, item: snapshot.item),
             icon: rowIconInput(from: snapshot),
             itemName: snapshot.item?.name,
             numberPattern: numberPattern
@@ -613,7 +619,9 @@ extension SitemapRowInputMapper {
             labelSourceRawValue: snapshot.labelSourceRawValue,
             preferredRowHeight: snapshot.preferredRowHeight,
             coordinateLatitude: hasValidCoordinate ? coordinate?.latitude : nil,
-            coordinateLongitude: hasValidCoordinate ? coordinate?.longitude : nil
+            coordinateLongitude: hasValidCoordinate ? coordinate?.longitude : nil,
+            linkedPageLink: snapshot.linkedPage?.link,
+            linkedPageTitle: snapshot.linkedPage?.title
         )
     }
 

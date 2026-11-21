@@ -12,13 +12,13 @@
 import CommonUI
 import OpenHABCore
 import os.log
-import SFSafeSymbols
+internal import SFSafeSymbols
 import SwiftUI
 
 struct SliderRow: View {
     let widget: OpenHABWidget
     let stateToken: String
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
     var fallbackSymbol: SFSymbol?
     @State private var pendingValue: Double?
     @State private var viewModel: WidgetRowViewModel

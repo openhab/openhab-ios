@@ -12,15 +12,14 @@
 @testable import openHAB
 import Testing
 
-// Regression test for the "foreground thundering herd" bug:
-// All retained SitemapPageViewModels receiving UIApplication.didBecomeActiveNotification
-// and simultaneously restarting page load/polling on app foreground.
-//
-// Only a visible page (between markAppeared and stopPageHandling) must react to
-// refreshOnForeground. Pages that were stopped because they scrolled off-screen
-// or were navigated away from must stay silent.
+/// Regression test for the "foreground thundering herd" bug:
+/// All retained SitemapPageViewModels receiving UIApplication.didBecomeActiveNotification
+/// and simultaneously restarting page load/polling on app foreground.
+///
+/// Only a visible page (between markAppeared and stopPageHandling) must react to
+/// refreshOnForeground. Pages that were stopped because they scrolled off-screen
+/// or were navigated away from must stay silent.
 @MainActor
-@Suite
 struct SitemapPageViewModelForegroundTests {
     // lastForegroundRefreshAt advances only when the visibility guard passes, making
     // it the right synchronous observable for these tests — no Task.yield needed.

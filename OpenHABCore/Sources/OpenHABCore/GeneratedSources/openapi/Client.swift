@@ -2283,7 +2283,12 @@ public struct Client: APIProtocol {
             deserializer: { response, responseBody in
                 switch response.status.code {
                 case 201:
-                    return .created(.init())
+                    let headers: Operations.createSitemapEventSubscription.Output.Created.Headers = .init(Location: try converter.getOptionalHeaderFieldAsURI(
+                        in: response.headerFields,
+                        name: "Location",
+                        as: Swift.String.self
+                    ))
+                    return .created(.init(headers: headers))
                 case 200:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
                     let body: Operations.createSitemapEventSubscription.Output.Ok.Body
@@ -2686,8 +2691,7 @@ public struct Client: APIProtocol {
                     let chosenContentType = try converter.bestContentType(
                         received: contentType,
                         options: [
-                            "text/event-stream",
-                            "application/json"
+                            "text/event-stream"
                         ]
                     )
                     switch chosenContentType {
@@ -2697,14 +2701,6 @@ public struct Client: APIProtocol {
                             from: responseBody,
                             transforming: { value in
                                 .text_event_hyphen_stream(value)
-                            }
-                        )
-                    case "application/json":
-                        body = try await converter.getResponseBodyAsJSON(
-                            Components.Schemas.SitemapWidgetEvent.self,
-                            from: responseBody,
-                            transforming: { value in
-                                .json(value)
                             }
                         )
                     default:

@@ -1,13 +1,13 @@
 {
-  "originHash" : "981c20eb876b3478e70e69ad39fa28a4a7b3c0300977d08d767317cc43c4c93a",
+  "originHash" : "897766711d601fadbff1bdaa3c841c0ac766883026f208bdf0e5799b3a5f6713",
   "pins" : [
     {
       "identity" : "swiftformatplugin",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftFormatPlugin",
       "state" : {
-        "revision" : "c41997c642ffc937c6e83b23dadbd7e626485cfa",
-        "version" : "0.58.7"
+        "revision" : "00bdb1f8cef4ddc51bade627d5d72caa16186e19",
+        "version" : "0.63.1"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weakfl/SwiftLintPlugin.git",
       "state" : {
-        "revision" : "47d1da3a8e30e0ada5543899e8c47f54664073ac",
-        "version" : "0.62.2"
+        "revision" : "dc342ba45ac5d2d9ecfdd51588c5f9bfbe455f81",
+        "version" : "0.65.1"
       }
     }
   ],

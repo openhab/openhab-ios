@@ -10,9 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-
 @testable import OpenHABCore
-
 import XCTest
 
 final class OpenHABCoreGeneralTests: XCTestCase {

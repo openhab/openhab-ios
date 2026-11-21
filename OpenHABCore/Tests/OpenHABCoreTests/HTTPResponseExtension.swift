@@ -44,13 +44,19 @@ public enum TestError: Swift.Error, LocalizedError, CustomStringConvertible, Sen
     }
 
     /// A localized description of the error suitable for presenting to the user.
-    public var errorDescription: String? { description }
+    public var errorDescription: String? {
+        description
+    }
 }
 
 public extension Date {
-    static var test: Date { Date(timeIntervalSince1970: 1_674_036_251) }
+    static var test: Date {
+        Date(timeIntervalSince1970: 1_674_036_251)
+    }
 
-    static var testString: String { "2023-01-18T10:04:11Z" }
+    static var testString: String {
+        "2023-01-18T10:04:11Z"
+    }
 }
 
 public extension HTTPResponse {
@@ -61,19 +67,31 @@ public extension HTTPResponse {
         }
     }
 
-    func withEncodedBody(_ encodedBody: String) throws -> (HTTPResponse, HTTPBody) { (self, .init(encodedBody)) }
+    func withEncodedBody(_ encodedBody: String) throws -> (HTTPResponse, HTTPBody) {
+        (self, .init(encodedBody))
+    }
 }
 
 public extension Data {
-    static var abcdString: String { "abcd" }
+    static var abcdString: String {
+        "abcd"
+    }
 
-    static var abcd: Data { Data(abcdString.utf8) }
+    static var abcd: Data {
+        Data(abcdString.utf8)
+    }
 
-    static var efghString: String { "efgh" }
+    static var efghString: String {
+        "efgh"
+    }
 
-    static var quotedEfghString: String { #""efgh""# }
+    static var quotedEfghString: String {
+        #""efgh""#
+    }
 
-    static var efgh: Data { Data(efghString.utf8) }
+    static var efgh: Data {
+        Data(efghString.utf8)
+    }
 
     static let crlf: ArraySlice<UInt8> = [0xD, 0xA]
 
@@ -107,7 +125,9 @@ public extension Data {
         return bytes
     }
 
-    static var multipartBody: Data { Data(multipartBodyAsSlice) }
+    static var multipartBody: Data {
+        Data(multipartBodyAsSlice)
+    }
 
     static var multipartTypedBodyAsSlice: [UInt8] {
         var bytes: [UInt8] = []
@@ -180,5 +200,7 @@ public extension Data {
 }
 
 public extension HTTPRequest {
-    func withEncodedBody(_ encodedBody: String) -> (HTTPRequest, HTTPBody) { (self, .init(encodedBody)) }
+    func withEncodedBody(_ encodedBody: String) -> (HTTPRequest, HTTPBody) {
+        (self, .init(encodedBody))
+    }
 }

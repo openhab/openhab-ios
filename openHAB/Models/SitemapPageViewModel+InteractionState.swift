@@ -15,8 +15,9 @@ import OpenHABCore
 extension SitemapPageViewModel {
     var relevantWidgets: [OpenHABWidget] {
         let widgets = currentPage?.widgets ?? []
-        guard !searchText.isEmpty else { return widgets }
-        return widgets.filter {
+        let visibleWidgets = sitemapVisibleWidgets(widgets)
+        guard !searchText.isEmpty else { return visibleWidgets }
+        return visibleWidgets.filter {
             $0.label.lowercased().contains(searchText.lowercased()) && $0.type != .frame
         }
     }

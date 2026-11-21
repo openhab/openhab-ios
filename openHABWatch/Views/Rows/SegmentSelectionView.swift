@@ -57,7 +57,6 @@ struct SegmentSelectionView: View {
         _viewModel = State(wrappedValue: viewModel)
     }
 
-    @ViewBuilder
     private func standardButton(for mapping: OpenHABWidgetMapping, at index: Int) -> some View {
         Button {
             selectOption(at: index)
@@ -67,7 +66,6 @@ struct SegmentSelectionView: View {
         .buttonStyle(PlainButtonStyle())
     }
 
-    @ViewBuilder
     private func pressReleaseButton(for mapping: OpenHABWidgetMapping, at index: Int) -> some View {
         optionLabel(for: mapping, at: index, isPressed: pressedIndex == index)
             .gesture(
@@ -85,7 +83,6 @@ struct SegmentSelectionView: View {
             )
     }
 
-    @ViewBuilder
     private func optionLabel(for mapping: OpenHABWidgetMapping, at index: Int, isPressed: Bool) -> some View {
         HStack {
             Text(mapping.label)

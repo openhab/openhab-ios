@@ -16,10 +16,11 @@ import SwiftUI
 
 struct SitemapSettingsView: View {
     @Binding var settingsRealTimeSliders: Bool
-    @Binding var settingsShowSearchField: Bool
     @Binding var settingsIconType: IconType
     @Binding var settingsSortSitemapsBy: SortSitemapsOrder
+    @Binding var settingsSitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode
     @Binding var settingsSitemapForWatch: String
+    @Binding var settingsSitemapForCarPlay: String
     @Binding var sitemaps: [OpenHABSitemap]
 
     @State private var showingCacheAlert = false
@@ -28,29 +29,21 @@ struct SitemapSettingsView: View {
     var body: some View {
         Section(header: Text(LocalizedStringKey("sitemap_settings"))) {
             realtimeSliderToggle
-            searchFieldToggle
             cacheButton
             iconTypePicker
+            displayModePicker
             sortOrderPicker
             watchSitemapPicker
+            carPlaySitemapPicker
         }
     }
 
-    @ViewBuilder
     private var realtimeSliderToggle: some View {
         Toggle(isOn: $settingsRealTimeSliders) {
             Text("Real-time Sliders")
         }
     }
 
-    @ViewBuilder
-    private var searchFieldToggle: some View {
-        Toggle(isOn: $settingsShowSearchField) {
-            Text("Show Search Field")
-        }
-    }
-
-    @ViewBuilder
     private var cacheButton: some View {
         Button {
             KingfisherManager.shared.cache.calculateDiskStorageSize { result in
@@ -72,7 +65,6 @@ struct SitemapSettingsView: View {
         )
     }
 
-    @ViewBuilder
     private var iconTypePicker: some View {
         Picker(selection: $settingsIconType) {
             ForEach(IconType.allCases, id: \.self) { icontype in
@@ -83,7 +75,16 @@ struct SitemapSettingsView: View {
         }
     }
 
-    @ViewBuilder
+    private var displayModePicker: some View {
+        Picker(selection: $settingsSitemapNameLabelDisplayMode) {
+            ForEach(SitemapNameLabelDisplayMode.allCases) { mode in
+                Text(verbatim: "\(mode)").tag(mode)
+            }
+        } label: {
+            Text("Show sitemaps by")
+        }
+    }
+
     private var sortOrderPicker: some View {
         Picker(selection: $settingsSortSitemapsBy) {
             ForEach(SortSitemapsOrder.allCases, id: \.self) { sortsitemaporder in
@@ -94,18 +95,46 @@ struct SitemapSettingsView: View {
         }
     }
 
-    @ViewBuilder
     private var watchSitemapPicker: some View {
         Picker("Sitemap for Apple Watch", selection: $settingsSitemapForWatch) {
+            Text("None").tag("")
             if sitemaps.isEmpty {
-                Text("No sitemaps available").tag("").foregroundStyle(.secondary)
+                // "None" above already covers the empty selection, so only add this
+                // placeholder when the stored selection is some other, not-yet-loaded
+                // sitemap — otherwise it would tag "" a second time (avoids the
+                // "invalid selection" warning while the sitemap list is still loading).
+                if !settingsSitemapForWatch.isEmpty {
+                    Text("No sitemaps available").tag(settingsSitemapForWatch).foregroundStyle(.secondary)
+                }
             } else {
                 ForEach(sitemaps, id: \.name) { sitemap in
-                    Text(sitemap.label).tag(sitemap.name)
+                    Text(settingsSitemapNameLabelDisplayMode.combinedText(for: sitemap, sortedBy: settingsSortSitemapsBy)).tag(sitemap.name)
                 }
             }
         }
         .disabled(sitemaps.isEmpty)
+        .onChange(of: sitemaps) { _, newList in
+            if !settingsSitemapForWatch.isEmpty, !newList.contains(where: { $0.name == settingsSitemapForWatch }) {
+                settingsSitemapForWatch = ""
+            }
+        }
+    }
+
+    private var carPlaySitemapPicker: some View {
+        Picker("Sitemap for CarPlay", selection: $settingsSitemapForCarPlay) {
+            Text("None").tag("")
+            if !sitemaps.isEmpty {
+                ForEach(sitemaps, id: \.name) { sitemap in
+                    Text(settingsSitemapNameLabelDisplayMode.combinedText(for: sitemap, sortedBy: settingsSortSitemapsBy)).tag(sitemap.name)
+                }
+            }
+        }
+        .disabled(sitemaps.isEmpty)
+        .onChange(of: sitemaps) { _, newList in
+            if !settingsSitemapForCarPlay.isEmpty, !newList.contains(where: { $0.name == settingsSitemapForCarPlay }) {
+                settingsSitemapForCarPlay = ""
+            }
+        }
     }
 
     @ViewBuilder
@@ -144,10 +173,11 @@ struct SitemapSettingsView: View {
 #Preview {
     struct PreviewWrapper: View {
         @State var realTimeSliders = true
-        @State var showSearchField = true
         @State var iconType: IconType = .svg
         @State var sortSitemapsBy: SortSitemapsOrder = .label
+        @State var sitemapNameLabelDisplayMode: SitemapNameLabelDisplayMode = .label
         @State var sitemapForWatch = "Home"
+        @State var sitemapForCarPlay = ""
         @State var sitemaps: [OpenHABSitemap] = [
             OpenHABSitemap(
                 name: "home",
@@ -169,10 +199,11 @@ struct SitemapSettingsView: View {
                 Form {
                     SitemapSettingsView(
                         settingsRealTimeSliders: $realTimeSliders,
-                        settingsShowSearchField: $showSearchField,
                         settingsIconType: $iconType,
                         settingsSortSitemapsBy: $sortSitemapsBy,
+                        settingsSitemapNameLabelDisplayMode: $sitemapNameLabelDisplayMode,
                         settingsSitemapForWatch: $sitemapForWatch,
+                        settingsSitemapForCarPlay: $sitemapForCarPlay,
                         sitemaps: $sitemaps
                     )
                 }

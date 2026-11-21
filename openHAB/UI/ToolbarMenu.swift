@@ -1,0 +1,935 @@
+// Copyright (c) 2010-2026 Contributors to the openHAB project
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
+//
+// SPDX-License-Identifier: EPL-2.0
+
+import CommonUI
+import Kingfisher
+import OpenHABCore
+import os.log
+import SFSafeSymbols
+import SwiftUI
+
+// MARK: - Navigation targets
+
+enum TargetController: Equatable {
+    case webview
+    /// A MainUI SPA page identified by its client-side route (e.g. `/page/{uid}`).
+    /// Rendered in the same web view as `.webview`; kept distinct so a reload
+    /// returns to this page rather than the MainUI root.
+    case mainUIPage(String)
+    case sitemap(String, navigationState: SitemapNavigationState = .ready([]))
+    case tile(String)
+}
+
+// MARK: - Menu size
+
+/// How tall the menu may grow. It grows with its content up to the room the popover has below
+/// its top, less a margin that stays free so that a tap there can dismiss it. The room is the
+/// window's safe area, so it follows the device, the orientation and a window that is resized.
+enum MenuSizing {
+    /// The tallest the menu grows before it scrolls, until the popover has measured the room it has.
+    static let defaultHeight: CGFloat = 480
+    /// Space left under the menu, enough to tap on.
+    static let dismissMargin: CGFloat = 60
+    /// Never smaller than this, however little room there is.
+    static let minimumHeight: CGFloat = 240
+
+    /// - Parameter room: From the top of the popover to the bottom of the window's safe area. Nil
+    ///   until the popover has been laid out.
+    static func maxHeight(room: CGFloat?, fallback: CGFloat = defaultHeight) -> CGFloat {
+        guard let room else { return fallback }
+        return max(minimumHeight, room - dismissMargin)
+    }
+}
+
+// MARK: - Connection status indicator
+
+struct ConnectionView: View {
+    static let cornerRadius: CGFloat = 14
+
+    var networkTracker = MainActorNetworkTracker.shared
+    @State private var cachedHomePrefs: HomePreferences?
+
+    var body: some View {
+        HStack {
+            if let activeConnection = networkTracker.activeConnection {
+                let homePrefs = cachedHomePrefs
+                let isLocal = activeConnection.configuration.url == homePrefs?.localConnectionConfig.url
+                Image(systemSymbol: isLocal ? .wifi : .cloudFill)
+                Text(homePrefs?.homeName ?? "").fontWeight(.medium)
+            } else {
+                Image(systemSymbol: .exclamationmarkIcloudFill)
+                Text("Connecting…")
+            }
+        }
+        .font(.footnote)
+        .task {
+            for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                cachedHomePrefs = prefs
+            }
+        }
+    }
+}
+
+// MARK: - Section toggle header
+
+/// Toggle header shared by every collapsible menu section: a disclosure chevron
+/// followed by the uppercased section title, driving `isExpanded`. A locked section
+/// (`onUnlock` set) shows a lock in its place and unlocks instead of toggling. A section that is
+/// still finding out whether it is locked (`isResolving`) shows a spinner and does nothing.
+struct SectionToggleHeader: View {
+    /// Space above and below the title.
+    static let verticalPadding: CGFloat = 14
+    /// Minimum tap target Apple recommends, applied in both states.
+    static let minTapTarget: CGFloat = 44
+
+    let title: String
+    @Binding var isExpanded: Bool
+    var accessibilityId: String?
+    var onUnlock: (() -> Void)?
+    var isResolving = false
+
+    var body: some View {
+        Button {
+            if let onUnlock {
+                onUnlock()
+            } else if !isResolving {
+                isExpanded.toggle()
+            }
+        } label: {
+            HStack(spacing: 8) {
+                if isResolving {
+                    ProgressView()
+                        .controlSize(.mini)
+                        .frame(width: 10)
+                } else {
+                    Image(systemSymbol: onUnlock != nil ? .lockFill : (isExpanded ? .chevronDown : .chevronRight))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 10)
+                }
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 16)
+            // The same padding in both states keeps the title in place when the section toggles.
+            .padding(.vertical, Self.verticalPadding)
+            // Padding alone falls short of the tap target at small Dynamic Type sizes.
+            .frame(minHeight: Self.minTapTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityId ?? title)
+    }
+}
+
+// MARK: - Toolbar dropdown menu
+
+/// Toolbar dropdown menu replacing the SideMenu drawer.
+struct ToolbarMenu: View {
+    /// Shared curve so the section content and the container height animate in sync.
+    private static let sectionAnimationDuration = 0.25
+    private static let sectionAnimation: Animation = .easeInOut(duration: sectionAnimationDuration)
+    /// Route sentinel for the MainUI home page, used to highlight the "Home" row.
+    private static let mainUIHomeRoute = "/"
+
+    @Binding var isPresented: Bool
+    var menuData: MenuDataService
+    /// The tallest the menu grows before it scrolls. See `MenuSizing`.
+    var maxHeight = MenuSizing.defaultHeight
+    /// Who is signed in to Main UI on the origin in use, sent over the bridge.
+    var authStatus: MainUIAuthStatus
+    @State private var scrollViewContentSize: Double = 0
+    // Section expansion is stored per home in `HomePreferences`. These `@State`
+    // flags mirror the active home for immediate UI updates and are loaded from
+    // (and written back to) that home whenever the menu opens or a section toggles.
+    @State private var isTilesExpanded = true
+    @State private var isMainUIExpanded = true
+    @State private var isAdministrationExpanded = true
+    @State private var isSitemapsExpanded = true
+    @State private var isSystemExpanded = true
+    @State private var isHomeExpanded = false
+    // Two-phase header animation state — independent of isHomeExpanded so each gets its own
+    // withAnimation context. Bool + ternary mirrors exactly how homeDetailsCollapsed drives
+    // frame; using the same mechanism ensures both animate identically.
+    @State private var headerDetailsHidden = false
+    @State private var homeDetailsCollapsed = false
+    @State private var showAppSettings = false
+    @State private var showCurrentHomeSettings = false
+    @State private var showNotifications = false
+    @State private var sitemapForWatch: String?
+    @State private var sitemapForCarPlay: String?
+    @State private var cachedHomePrefs: HomePreferences?
+    /// The surface `OpenHABRootView` currently shows. The single source of truth for which
+    /// row (if any) is highlighted as current — read directly rather than mirrored into local
+    /// `@State`, so navigation that bypasses this menu entirely (a push-notification deep
+    /// link, a home switch) is reflected here too instead of leaving a stale highlight.
+    var currentContent: TargetController
+    var onSelect: (TargetController) -> Void
+    var onReload: (() -> Void)?
+
+    /// The sitemap row (if any) to highlight as current, derived from `currentContent`.
+    private var currentSitemapName: String? {
+        if case let .sitemap(name, _) = currentContent {
+            return name
+        }
+        return nil
+    }
+
+    /// The MainUI row (if any) to highlight as current, derived from `currentContent`.
+    private var currentMainUIRoute: String? {
+        switch currentContent {
+        case .webview: Self.mainUIHomeRoute
+        case let .mainUIPage(route): route
+        case .sitemap, .tile: nil
+        }
+    }
+
+    /// The tile row (if any) to highlight as current, derived from `currentContent`.
+    private var currentTileURL: String? {
+        if case let .tile(url) = currentContent {
+            return url
+        }
+        return nil
+    }
+
+    @ScaledMetric private var iconWidth = 20.0
+
+    var body: some View {
+        menuContent(height: maxHeight)
+            .onAppear { Task { await loadExpansionState() } }
+            .onChange(of: isPresented) { _, newValue in
+                if newValue {
+                    // Re-read in case the active home changed while the menu was closed.
+                    Task { await loadExpansionState() }
+                    // Pick up sitemaps/pages added on the server since the last fetch.
+                    Task { await menuData.reload() }
+                } else {
+                    isHomeExpanded = false
+                    headerDetailsHidden = false
+                    homeDetailsCollapsed = false
+                }
+            }
+            .sheet(isPresented: $showAppSettings, onDismiss: refreshAfterSettings) {
+                NavigationStack {
+                    AppSettingsView()
+                }
+            }
+            .sheet(isPresented: $showCurrentHomeSettings, onDismiss: refreshAfterSettings) {
+                NavigationStack {
+                    HomeSettingsView()
+                }
+            }
+            .sheet(isPresented: $showNotifications) {
+                // Closing the notifications leaves the menu as it was. Choosing one of their actions
+                // takes the user elsewhere, so the menu closes, and the sheet that hangs off it.
+                NavigationView { NotificationsView { isPresented = false } }
+            }
+            .task {
+                for await prefs in await Preferences.shared.currentHomePreferencesStream {
+                    cachedHomePrefs = prefs
+                }
+            }
+    }
+}
+
+extension ToolbarMenu {
+    /// What the user can do in Main UI. Nil until the server's endpoints are known.
+    private var access: MainUIAccess? {
+        MainUIAccess(server: menuData.server, status: authStatus)
+    }
+
+    /// Notifications need a connection that supports them. UI tests run in demo mode, which has
+    /// none, so they ask for the entry with `UITestNotifications`, which also gives it notifications.
+    private var showsNotificationsEntry: Bool {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UITestNotifications"] != nil {
+            return true
+        }
+        #endif
+        guard let cachedHomePrefs else { return false }
+        return Preferences.getNotificationConnection(of: cachedHomePrefs) != nil
+    }
+
+    /// The menu lives in a popover that stays open while a settings sheet shows, since closing it
+    /// would take down the sheet, which hangs off this view. So it reloads its entries and its
+    /// per-home state when the sheet goes away, in case the settings changed what it shows.
+    private func refreshAfterSettings() {
+        Task {
+            await menuData.reload()
+            await loadExpansionState()
+        }
+    }
+
+    /// Mirrors the active home's persisted section-expansion state into local `@State`.
+    private func loadExpansionState() async {
+        let prefs = await Preferences.shared.currentHomePreferences
+        cachedHomePrefs = prefs
+        let collapsed = prefs.collapsedSections
+        isMainUIExpanded = !collapsed.contains(.mainUI)
+        isSitemapsExpanded = !collapsed.contains(.sitemaps)
+        isTilesExpanded = !collapsed.contains(.tiles)
+        isSystemExpanded = !collapsed.contains(.system)
+        isAdministrationExpanded = !collapsed.contains(.administration)
+        sitemapForWatch = prefs.sitemapForWatch
+        sitemapForCarPlay = prefs.sitemapForCarPlay
+        headerDetailsHidden = false
+        homeDetailsCollapsed = false
+    }
+
+    /// Toggles `sitemap` as the one sent to the paired Apple Watch, persisting the
+    /// choice (and its display label) to the active home, or clearing it if the
+    /// same sitemap is double-tapped again.
+    private func toggleWatchSitemap(_ sitemap: OpenHABSitemap) {
+        let isToggleOff = sitemap.name == sitemapForWatch
+        let sitemapName = sitemap.name
+        let sitemapLabel = sitemap.label
+        if isToggleOff {
+            sitemapForWatch = nil
+        } else {
+            sitemapForWatch = sitemapName
+        }
+        Task {
+            await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                if isToggleOff {
+                    prefs.sitemapForWatch = ""
+                    prefs.sitemapForWatchLabel = ""
+                } else {
+                    prefs.sitemapForWatch = sitemapName
+                    prefs.sitemapForWatchLabel = sitemapLabel
+                }
+            }
+        }
+    }
+
+    /// Toggles `sitemap` as the one shown in CarPlay, persisting the choice to the
+    /// active home, or clearing it if the same sitemap is long-pressed again.
+    private func toggleCarPlaySitemap(_ sitemap: OpenHABSitemap) {
+        let isToggleOff = sitemap.name == sitemapForCarPlay
+        let sitemapName = sitemap.name
+        if isToggleOff {
+            sitemapForCarPlay = nil
+        } else {
+            sitemapForCarPlay = sitemapName
+        }
+        Task {
+            await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                if isToggleOff {
+                    prefs.sitemapForCarPlay = ""
+                } else {
+                    prefs.sitemapForCarPlay = sitemapName
+                }
+            }
+        }
+    }
+
+    /// A binding that updates the local `@State` mirror for an immediate UI
+    /// response and writes the new value through to the active home so the
+    /// choice persists per home and across restarts.
+    private func expansionBinding(_ state: Binding<Bool>,
+                                  persistTo setter: @escaping @Sendable (inout HomePreferences, Bool) -> Void) -> Binding<Bool> {
+        Binding(
+            get: { state.wrappedValue },
+            set: { newValue in
+                state.wrappedValue = newValue
+                let capturedValue = newValue
+                Task {
+                    await Preferences.shared.modifyActiveHome { @Sendable prefs in
+                        setter(&prefs, capturedValue)
+                    }
+                }
+            }
+        )
+    }
+
+    // MARK: - Menu content
+
+    private func tilesMenu() -> some View {
+        ForEach(menuData.uiTiles, id: \.url) { tile in
+            menuRow(
+                icon: AnyView(ImageView(url: tile.imageUrl).scaledToFit()),
+                label: tile.name
+            ) {
+                select(.tile(tile.url))
+            }
+            .background(currentRowBackground(tile.url == currentTileURL))
+        }
+    }
+
+    @ViewBuilder
+    private func systemMenu() -> some View {
+        systemRow(symbol: .gear, label: String(localized: "App Settings")) {
+            showAppSettings = true
+        }
+        if showsNotificationsEntry {
+            systemRow(symbol: .bell, label: String(localized: "notifications", comment: "")) {
+                showNotifications = true
+            }
+        }
+        mainUIEntryRow(MainUIMenu.aboutEntry)
+    }
+
+    @ViewBuilder
+    private func sitemapsMenu() -> some View {
+        // `sitemapNameLabelDisplayMode` chooses which field(s) to show; when it is `.both`,
+        // the sort order decides which one is the title. The list itself is
+        // already ordered by `MenuDataService`.
+        let prefs = cachedHomePrefs
+        let order = SortSitemapsOrder(rawValue: prefs?.sortSitemapsBy ?? 0) ?? .label
+        let mode = prefs?.sitemapNameLabelDisplayMode ?? .label
+        ForEach(menuData.sitemaps, id: \.name) { sitemap in
+            let isWatch = sitemap.name == sitemapForWatch
+            let isCarPlay = sitemap.name == sitemapForCarPlay
+            let isCurrent = sitemap.name == currentSitemapName
+            menuDetailRow(
+                icon: AnyView(sitemapIcon(for: sitemap)),
+                title: mode.titleText(for: sitemap, sortedBy: order),
+                detail: mode.detailText(for: sitemap, sortedBy: order),
+                accessibilityId: sitemap.name,
+                trailing: (isWatch || isCarPlay) ? AnyView(
+                    HStack(spacing: 4) {
+                        if isWatch {
+                            Image(systemSymbol: .applewatchWatchface)
+                        }
+                        if isCarPlay {
+                            Image(systemSymbol: .steeringwheel)
+                        }
+                    }
+                ) : nil
+            )
+            .background(currentRowBackground(isCurrent))
+            // All three gestures are on this same view so SwiftUI can disambiguate the
+            // single- vs double-tap count correctly (it can't across separate modifier
+            // layers, e.g. one inside menuDetailRow and one attached by the caller).
+            .onTapGesture(count: 2) { toggleWatchSitemap(sitemap) }
+            .onTapGesture { select(.sitemap(sitemap.name)) }
+            .onLongPressGesture { toggleCarPlaySitemap(sitemap) }
+        }
+    }
+
+    @ViewBuilder
+    private func mainUIMenu() -> some View {
+        let homeRoute = Self.mainUIHomeRoute
+        menuRow(
+            icon: AnyView(Image("openHABIcon").resizable()),
+            label: String(localized: "Home"),
+            accessibilityId: "Home"
+        ) {
+            select(.webview)
+        }
+        .background(currentRowBackground(currentMainUIRoute == homeRoute))
+        if menuData.isLoading, menuData.uiPages.isEmpty {
+            loadingRow(label: String(localized: "Pages"))
+        } else {
+            ForEach(MainUIMenu.pinnedPages(menuData.uiPages, access: access), id: \.uid) { page in
+                let route = "/page/\(page.uid)"
+                menuRow(
+                    icon: AnyView(pageIcon(for: page)),
+                    label: page.label
+                ) {
+                    select(.mainUIPage(route))
+                }
+                .background(currentRowBackground(currentMainUIRoute == route))
+            }
+        }
+        if let chat = MainUIMenu.chatEntry(server: menuData.server) {
+            mainUIEntryRow(chat)
+        }
+    }
+
+    // MARK: - Administration
+
+    private func mainUIEntryRow(_ entry: MainUIMenuEntry, footer: String? = nil, accessibilityId: String? = nil) -> some View {
+        menuDetailRow(
+            icon: AnyView(Image(systemSymbol: entry.symbol).resizable().scaledToFit()),
+            title: entry.label,
+            detail: footer ?? "",
+            accessibilityId: accessibilityId ?? "MainUIEntry-\(entry.id)"
+        )
+        .background(currentRowBackground(currentMainUIRoute == entry.path))
+        .onTapGesture { select(.mainUIPage(entry.path)) }
+    }
+
+    /// What Administration lists: the entries for an administrator, then the signed-in user's
+    /// account. Nothing while it is locked.
+    @ViewBuilder
+    private func administrationMenu() -> some View {
+        if let access, let server = menuData.server {
+            if access.isAdministrator {
+                ForEach(MainUIMenu.administrationEntries(server: server)) { entry in
+                    mainUIEntryRow(entry)
+                }
+            }
+            if case let .signedIn(user) = access {
+                mainUIEntryRow(
+                    MainUIMenuEntry(
+                        id: "account",
+                        label: user.name,
+                        symbol: .personCropCircle,
+                        path: MainUIMenu.profileRoute
+                    ),
+                    footer: MainActorNetworkTracker.shared.activeConnection?.configuration.url
+                )
+            }
+        }
+    }
+
+    /// Shown once the server is known: with the entries when signed in, as a lock that signs in
+    /// when not. Locked or not, the saved open/closed state is left alone.
+    @ViewBuilder
+    private func administrationSection(isLast: Bool) -> some View {
+        let isLocked = access == .signedOut
+        collapsibleSection(
+            title: "Administration",
+            isExpanded: expansionBinding($isAdministrationExpanded) { prefs, v in prefs.setSection(.administration, expanded: v) },
+            isEmpty: access == nil,
+            showDivider: !isLast,
+            accessibilityId: "AdministrationSection",
+            onUnlock: isLocked ? { unlockAdministration() } : nil,
+            isResolving: access == .resolving
+        ) {
+            administrationMenu()
+        }
+    }
+
+    /// Opens the profile in Main UI, which signs the user in if nobody is. It does so on its own
+    /// page, so the menu makes room. Somebody who signed in on an earlier visit is let straight in.
+    private func unlockAdministration() {
+        select(.mainUIPage(MainUIMenu.profileRoute))
+    }
+
+    private func homesMenu() -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            InlineHomePickerView(isMenuPresented: $isPresented)
+            Divider().padding(.horizontal, 12)
+        }
+    }
+
+    @ViewBuilder
+    private func menuSection(_ section: MenuSection, isLast: Bool) -> some View {
+        switch section {
+        case .mainUI:
+            collapsibleSection(
+                title: "Main UI",
+                isExpanded: expansionBinding($isMainUIExpanded) { prefs, v in prefs.setSection(.mainUI, expanded: v) },
+                showDivider: !isLast
+            ) {
+                mainUIMenu()
+            }
+        case .administration:
+            administrationSection(isLast: isLast)
+        case .sitemaps:
+            collapsibleSection(
+                title: "Sitemaps",
+                isExpanded: expansionBinding($isSitemapsExpanded) { prefs, v in prefs.setSection(.sitemaps, expanded: v) },
+                isLoading: menuData.isLoading,
+                isEmpty: menuData.sitemaps.isEmpty,
+                showDivider: !isLast
+            ) {
+                sitemapsMenu()
+            }
+        case .tiles:
+            collapsibleSection(
+                title: "Tiles",
+                isExpanded: expansionBinding($isTilesExpanded) { prefs, v in prefs.setSection(.tiles, expanded: v) },
+                isLoading: menuData.isLoading,
+                isEmpty: menuData.uiTiles.isEmpty,
+                showDivider: !isLast
+            ) {
+                tilesMenu()
+            }
+        case .system:
+            collapsibleSection(
+                title: "System & App",
+                isExpanded: expansionBinding($isSystemExpanded) { prefs, v in prefs.setSection(.system, expanded: v) },
+                showDivider: !isLast
+            ) {
+                systemMenu()
+            }
+        }
+    }
+
+    private func menuContent(height: CGFloat) -> some View {
+        VStack(spacing: 0) {
+            let scrollView = ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Home section: header + picker that is always in the layout.
+                    // Keeping homesMenu() in the layout at all times (height 0 when collapsed)
+                    // avoids the jump that occurs when conditional insertion allocates space
+                    // instantly before the transition visual can begin.
+                    VStack(alignment: .leading, spacing: 0) {
+                        homeHeader()
+                        Divider()
+                        homesMenu()
+                            .opacity(isHomeExpanded ? 1 : 0)
+                            .frame(maxHeight: isHomeExpanded ? nil : 0, alignment: .top)
+                            .clipped()
+                    }
+                    .animation(Self.sectionAnimation, value: isHomeExpanded)
+
+                    let sectionOrder = cachedHomePrefs?.sectionOrder ?? MenuSection.allCases
+                    ForEach(sectionOrder, id: \.self) { section in
+                        menuSection(section, isLast: section == sectionOrder.last)
+                    }
+                }
+            }
+            .frame(maxHeight: scrollViewContentSize > 0 ? min(scrollViewContentSize, height) : height)
+            // Always bounce vertically — even when the content fits — so pull-to-refresh
+            // can be triggered on a short menu.
+            .scrollBounceBehavior(.always, axes: .vertical)
+            .refreshable { await menuData.refresh() }
+            .accessibilityIdentifier("ToolbarMenuScrollView")
+            #if DEBUG
+            .accessibilityValue("\(menuData.reloadCount)")
+            #endif
+            // Host the animation on the sections' shared parent so a change in any
+            // one flag also animates the *repositioning* of the sibling sections
+            // below it — each section's own `.animation` only covers its own subtree.
+            .animation(Self.sectionAnimation, value: isHomeExpanded)
+            .animation(Self.sectionAnimation, value: isMainUIExpanded)
+            .animation(Self.sectionAnimation, value: isAdministrationExpanded)
+            .animation(Self.sectionAnimation, value: isSitemapsExpanded)
+            .animation(Self.sectionAnimation, value: isTilesExpanded)
+            .animation(Self.sectionAnimation, value: isSystemExpanded)
+
+            scrollView.onScrollGeometryChange(
+                for: Double.self,
+                of: { $0.contentSize.height },
+                action: { _, newValue in
+                    // Animate the container growing/shrinking so it tracks the section
+                    // content instead of snapping. Skip the first measurement (0 → N),
+                    // which would otherwise shrink the menu from full height on open.
+                    if scrollViewContentSize == 0 {
+                        scrollViewContentSize = newValue
+                    } else {
+                        withAnimation(Self.sectionAnimation) { scrollViewContentSize = newValue }
+                    }
+                }
+            )
+        }
+        .frame(width: 300)
+    }
+
+    // MARK: - Home header
+
+    private func toggleHomeExpanded() {
+        let half = Self.sectionAnimationDuration / 2
+        if !isHomeExpanded {
+            // Phase 1: fade out details (Bool ternary + withAnimation mirrors homeDetailsCollapsed).
+            withAnimation(.easeInOut(duration: half)) { headerDetailsHidden = true }
+            // Phase 2: collapse layout + rotate chevron (delayed by half).
+            withAnimation(.easeInOut(duration: half).delay(half)) { homeDetailsCollapsed = true }
+            // Expand picker with full sectionAnimation (drives homesMenu height/opacity).
+            withAnimation(Self.sectionAnimation) { isHomeExpanded = true }
+        } else {
+            // Phase 1: restore layout + rotate chevron back (immediate, half duration).
+            withAnimation(.easeInOut(duration: half)) { homeDetailsCollapsed = false }
+            // Phase 2: fade in details (delayed so content appears after layout has opened).
+            withAnimation(.easeInOut(duration: half).delay(half)) { headerDetailsHidden = false }
+            // Collapse picker.
+            withAnimation(Self.sectionAnimation) { isHomeExpanded = false }
+        }
+    }
+
+    private func homeHeader() -> some View {
+        // Phase 1 (fade): conditional views keyed to headerDetailsHidden transition in/out.
+        // A hidden placeholder keeps the layout space so the header height doesn't jump.
+        // Phase 2 (layout): homeDetailsCollapsed collapses the frame after the fade completes.
+        HStack(alignment: .center, spacing: 0) {
+            Button(action: toggleHomeExpanded) {
+                HStack(alignment: .center, spacing: 8) {
+                    Image(systemSymbol: .chevronRight)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 10)
+                        .rotationEffect(.degrees(homeDetailsCollapsed ? 90 : 0))
+
+                    let homePrefs = cachedHomePrefs
+                    ZStack(alignment: .center) {
+                        HomeAvatarView(
+                            photo: nil,
+                            icon: HomeAvatarView.defaultIcon,
+                            color: HomeAvatarView.defaultColor,
+                            size: 28
+                        ).hidden()
+                        if !headerDetailsHidden, let homePrefs {
+                            let mode = homePrefs.avatarMode
+                            HomeAvatarView(
+                                photo: AvatarImageHelper.renderedAvatar(for: homePrefs.id, mode: mode),
+                                icon: mode?.icon ?? HomeAvatarView.defaultIcon,
+                                color: Color(hex: mode?.colorHex ?? "") ?? HomeAvatarView.defaultColor,
+                                size: 28
+                            )
+                            .transition(.opacity)
+                        }
+                    }
+                    .frame(width: homeDetailsCollapsed ? 0 : nil)
+                    .clipped()
+
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Homes")
+                            .font(.footnote)
+                            .fontWeight(.semibold)
+                            .padding(.bottom, 3)
+
+                        ZStack(alignment: .topLeading) {
+                            // Always-present placeholder keeps space during the fade.
+                            ConnectionView().hidden()
+                            if !headerDetailsHidden {
+                                ConnectionView()
+                                    .transition(.opacity)
+                            }
+                        }
+                        .frame(maxHeight: homeDetailsCollapsed ? 0 : 40, alignment: .top)
+                        .clipped()
+                        .layoutPriority(1)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 12)
+
+            Button(
+                action: { menuData.clearAndReload(); onReload?(); isPresented = false },
+                label: { Image(systemSymbol: .arrowClockwise).foregroundStyle(.secondary) }
+            )
+            .buttonStyle(.plain)
+            .frame(maxHeight: .infinity)
+            .padding(.trailing, homeDetailsCollapsed ? 0 : 12)
+
+            ZStack {
+                // Placeholder keeps gear button space during the fade.
+                Image(systemSymbol: .gear).hidden()
+                if !headerDetailsHidden {
+                    Button(
+                        action: { showCurrentHomeSettings = true },
+                        label: { Image(systemSymbol: .gear).foregroundStyle(.secondary) }
+                    )
+                    .buttonStyle(.plain)
+                    .transition(.opacity)
+                }
+            }
+            .allowsHitTesting(!headerDetailsHidden && !homeDetailsCollapsed)
+            .frame(width: homeDetailsCollapsed ? 0 : nil)
+            .clipped()
+            .frame(maxHeight: .infinity)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    // MARK: - Loading row
+
+    private func loadingRow(label: String) -> some View {
+        HStack(spacing: 8) {
+            ProgressView()
+                .controlSize(.small)
+            Text(label)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 10)
+        .padding(.bottom, 6)
+    }
+
+    // MARK: - Collapsible section
+
+    /// A collapsible menu section: an optional loading/empty guard, a toggle
+    /// header with a disclosure chevron, the expanded `content`, and an optional
+    /// trailing divider.
+    ///
+    /// - Parameters:
+    ///   - title: Localization key for the section label shown (uppercased) in the header.
+    ///   - isExpanded: Binding to the section's persisted expansion flag.
+    ///   - isLoading: When `true` and the section is empty, a `loadingRow` replaces it.
+    ///     A reload of a populated section keeps showing the current rows.
+    ///   - isEmpty: When `true` (and not loading), the section is hidden entirely.
+    ///   - showDivider: Whether to append a trailing divider below the content.
+    ///   - accessibilityId: Identifier of the header, for UI tests.
+    ///   - onUnlock: Non-nil while the section is locked. The header then shows a lock instead of
+    ///     the chevron, runs this instead of toggling, and keeps the content away.
+    ///   - isResolving: True while it is not yet known whether the section is locked. The header
+    ///     then shows a spinner, does nothing, and keeps the content away.
+    ///   - content: The section body, shown only while expanded.
+    @ViewBuilder
+    private func collapsibleSection(title: String.LocalizationValue,
+                                    isExpanded: Binding<Bool>,
+                                    isLoading: Bool = false,
+                                    isEmpty: Bool = false,
+                                    showDivider: Bool = true,
+                                    accessibilityId: String? = nil,
+                                    onUnlock: (() -> Void)? = nil,
+                                    isResolving: Bool = false,
+                                    @ViewBuilder content: () -> some View) -> some View {
+        let localizedTitle = String(localized: title)
+        if isLoading, isEmpty {
+            loadingRow(label: localizedTitle)
+        } else if !isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionToggleHeader(
+                    title: localizedTitle,
+                    isExpanded: isExpanded,
+                    accessibilityId: accessibilityId,
+                    onUnlock: onUnlock,
+                    isResolving: isResolving
+                )
+
+                if isExpanded.wrappedValue, onUnlock == nil, !isResolving {
+                    // Wrap in a single container so the transition has one stable
+                    // identity to animate — a bare ViewBuilder group (TupleView /
+                    // ForEach) is layout-transparent and won't transition.
+                    VStack(alignment: .leading, spacing: 0) {
+                        content()
+                    }
+                    .transition(.blurReplace(.downUp))
+                }
+
+                if showDivider {
+                    Divider().padding(.horizontal, 12)
+                }
+            }
+            // Value-based animation (not `withAnimation`): the section toggle
+            // mutates the flag outside any `withAnimation` transaction. Diffing
+            // the resolved value here animates the change regardless of trigger.
+            .animation(Self.sectionAnimation, value: isExpanded.wrappedValue)
+        }
+    }
+
+    // MARK: - Row helpers
+
+    private func menuRow(icon: AnyView,
+                         label: String,
+                         accessibilityId: String? = nil,
+                         trailing: AnyView? = nil,
+                         action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                icon
+                    .frame(width: iconWidth, height: iconWidth)
+                Text(label)
+                    .lineLimit(1)
+                if let trailing {
+                    Spacer()
+                    trailing
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityId ?? label)
+    }
+
+    /// A two-line variant of `menuRow`: an icon beside a primary `title` with an
+    /// optional secondary `detail` below it, mirroring the home-picker rows. The
+    /// `detail` line is omitted entirely when empty so equal name/label collapses
+    /// to a single line.
+    /// Not Button-based: sitemapsMenu() layers a double-tap (watch) and long-press (CarPlay)
+    /// gesture on top of the single-tap select action, and a Button's own gesture recognizer
+    /// wins the touch immediately — firing select() before a second tap can be recognized as
+    /// a double-tap. A plain view lets SwiftUI's .onTapGesture/.onTapGesture(count: 2) pair
+    /// disambiguate correctly, the way DrawerView's original implementation did.
+    private func menuDetailRow(icon: AnyView,
+                               title: String,
+                               detail: String,
+                               accessibilityId: String? = nil,
+                               trailing: AnyView? = nil) -> some View {
+        HStack(spacing: 10) {
+            icon
+                .frame(width: iconWidth, height: iconWidth)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .lineLimit(1)
+                if !detail.isEmpty {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            Spacer(minLength: 0)
+            if let trailing {
+                trailing
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+        .accessibilityIdentifier(accessibilityId ?? title)
+        .accessibilityAddTraits(.isButton)
+    }
+
+    /// Shared highlight background for a menu row representing the currently displayed
+    /// sitemap/page, used by both `sitemapsMenu()` and `mainUIMenu()`.
+    private func currentRowBackground(_ isCurrent: Bool) -> some View {
+        isCurrent ? Color.secondary.opacity(0.15) : Color.clear
+    }
+
+    private func systemRow(symbol: SFSymbol, label: String, action: @escaping () -> Void) -> some View {
+        menuRow(
+            icon: AnyView(Image(systemSymbol: symbol).resizable().scaledToFit()),
+            label: label,
+            action: action
+        )
+    }
+
+    private func pageIcon(for page: OpenHABUIPage) -> some View {
+        Group {
+            if page.icon.isEmpty || page.icon.isNoneIcon {
+                Image(systemSymbol: .squareGrid2x2).resizable().scaledToFit()
+            } else {
+                let url = Endpoint.iconForDrawer(
+                    rootUrl: MainActorNetworkTracker.shared.activeConnection?.configuration.url ?? "",
+                    icon: page.icon
+                ).url
+                KFImage(url)
+                    .placeholder { Image(systemSymbol: .squareGrid2x2).resizable().scaledToFit() }
+                    .resizable()
+                    .scaledToFit()
+            }
+        }
+    }
+
+    private func sitemapIcon(for sitemap: OpenHABSitemap) -> some View {
+        Group {
+            if sitemap.icon.isEmpty {
+                Image("openHABIcon").resizable()
+            } else {
+                let url = Endpoint.iconForDrawer(
+                    rootUrl: MainActorNetworkTracker.shared.activeConnection?.configuration.url ?? "",
+                    icon: sitemap.icon
+                ).url
+                KFImage(url)
+                    .placeholder { Image("openHABIcon").resizable() }
+                    .resizable()
+            }
+        }
+        .scaledToFit()
+    }
+
+    // MARK: - Helpers
+
+    private func select(_ target: TargetController) {
+        isPresented = false
+        onSelect(target)
+    }
+}

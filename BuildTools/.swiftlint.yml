@@ -83,22 +83,14 @@ line_length:
 
 identifier_name:
   allowed_symbols: "_"
-  min_length: 2
+  min_length: 1
   max_length:
     warning: 90
     error: 1000
-  excluded:
-    - id
-    - a
-    - b
-    - g
-    - i
-    - k
-    - n
-    - r
-    - v
-    - x
-    - y
+
+large_tuple:
+    warning: 4
+    error: 5
 
 private_outlet:
   allow_private_set: true
@@ -127,7 +119,7 @@ custom_rules:
 
 file_name:
   suffix_pattern: "Extension?|\\+.*"
-  excluded: ["WatchTypography.swift", "WidgetRowInputs.swift", "SitemapPageViewModel+SupportTypes.swift", "SnapshotHelper.swift"]
+  excluded: ["WatchTypography.swift", "WidgetRowInputs.swift", "SitemapPageViewModel+SupportTypes.swift", "SnapshotHelper.swift", "AppIntentsTests.swift"]
 
 opening_brace:
   ignore_multiline_function_signatures: true

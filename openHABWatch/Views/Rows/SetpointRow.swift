@@ -12,13 +12,13 @@
 import CommonUI
 import OpenHABCore
 import os.log
-import SFSafeSymbols
+internal import SFSafeSymbols
 import SwiftUI
 
 struct SetpointRow: View {
     let widget: OpenHABWidget
     let stateToken: String
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
     private let setpointService = SetPointService()
     private let logger = Logger(subsystem: "org.openhab.watch", category: "SetpointRow")
     @State private var viewModel: WidgetRowViewModel

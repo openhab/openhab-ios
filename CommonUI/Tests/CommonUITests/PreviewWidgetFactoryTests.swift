@@ -49,9 +49,14 @@ struct PreviewWidgetFactoryTests {
             valueText: "Mode"
         )
 
-        #expect(widget.type == .switchWidget)
-        #expect(widget.mappings.count == 2)
-        #expect(widget.item?.state == "OFF")
-        #expect(widget.labelValue == "Mode")
+        // OpenHABWidget is non-Sendable; intermediate sub-expression captures in #expect crash with -enable-actor-data-race-checks.
+        let widgetType = widget.type
+        let mappingCount = widget.mappings.count
+        let itemState = widget.item?.state
+        let labelValue = widget.labelValue
+        #expect(widgetType == .switchWidget)
+        #expect(mappingCount == 2)
+        #expect(itemState == "OFF")
+        #expect(labelValue == "Mode")
     }
 }

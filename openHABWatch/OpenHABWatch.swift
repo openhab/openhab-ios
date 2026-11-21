@@ -12,18 +12,16 @@
 import CommonUI
 import Kingfisher
 import OpenHABCore
-import SFSafeSymbols
+internal import SFSafeSymbols
 import SwiftUI
 import UserNotifications
 
 @main
 struct OpenHABWatch: App {
-    @Environment(\.scenePhase) private var scenePhase
-    @ObservedObject var settings = AppSettings.shared
-    @State private var wasInBackground = false
+    let settings = AppSettings.shared
     // https://developer.apple.com/documentation/watchkit/wkapplicationdelegate
     @WKApplicationDelegateAdaptor var appDelegate: OpenHABWatchAppDelegate
-    @ObservedObject var userData = UserData.shared
+    let userData = UserData.shared
 
     var body: some Scene {
         WindowGroup {
@@ -42,7 +40,7 @@ struct OpenHABWatch: App {
                     }
             }
             .tabViewStyle(.automatic)
-            .environmentObject(settings)
+            .environment(settings)
             .task {
                 let center = UNUserNotificationCenter.current()
                 _ = try? await center.requestAuthorization(
@@ -51,27 +49,7 @@ struct OpenHABWatch: App {
                 // Configure Kingfisher to use our app delegate for auth challenges
                 ImageDownloader.default.authenticationChallengeResponder = appDelegate
             }
-            .onChange(of: scenePhase) { _, newPhase in
-                switch newPhase {
-                case .background:
-                    wasInBackground = true
-                case .active:
-                    guard wasInBackground else { return }
-                    wasInBackground = false
-                    Task { @MainActor in
-                        await userData.refreshUrl(force: true)
-                    }
-                default:
-                    break
-                }
-            }
         }
         WKNotificationScene(controller: NotificationController.self, category: "openHABNotification")
-    }
-
-    init() {
-        DispatchQueue.main.async {
-            AppMessageService.singleton.requestApplicationContext()
-        }
     }
 }

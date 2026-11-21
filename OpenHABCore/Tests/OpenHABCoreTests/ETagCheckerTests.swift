@@ -83,7 +83,7 @@ struct ETagCheckerTests {
     func firstRunStoresETag() async throws {
         MockURLProtocol.reset()
 
-        let testURL = URL(string: "https://example.com/index.html")!
+        let testURL = try #require(URL(string: "https://example.com/index.html"))
         let etagValue = "\"abc123\""
 
         // Setup mock
@@ -111,7 +111,7 @@ struct ETagCheckerTests {
     func unchangedWhenETagMatches() async throws {
         MockURLProtocol.reset()
 
-        let testURL = URL(string: "https://example.com/data.json")!
+        let testURL = try #require(URL(string: "https://example.com/data.json"))
         let etagValue = "\"def456\""
 
         // Pre-populate cache
@@ -136,7 +136,7 @@ struct ETagCheckerTests {
     func changedWhenETagDiffers() async throws {
         MockURLProtocol.reset()
 
-        let testURL = URL(string: "https://example.com/api/v1/data")!
+        let testURL = try #require(URL(string: "https://example.com/api/v1/data"))
         let oldETag = "\"old123\""
         let newETag = "\"new456\""
 
@@ -166,7 +166,7 @@ struct ETagCheckerTests {
     func failedOnNetworkError() async throws {
         MockURLProtocol.reset()
 
-        let testURL = URL(string: "https://example.com/fail")!
+        let testURL = try #require(URL(string: "https://example.com/fail"))
 
         // Configure mock to fail
         MockURLProtocol.shouldFail = true
@@ -188,7 +188,7 @@ struct ETagCheckerTests {
     func changedWhenNoETagHeader() async throws {
         MockURLProtocol.reset()
 
-        let testURL = URL(string: "https://example.com/no-etag")!
+        let testURL = try #require(URL(string: "https://example.com/no-etag"))
 
         // Mock response without ETag header
         MockURLProtocol.mockResponses[testURL] = (200, [:])
@@ -209,7 +209,7 @@ struct ETagCheckerTests {
     func normalizesQuotedETags() async throws {
         MockURLProtocol.reset()
 
-        let testURL = URL(string: "https://example.com/normalize")!
+        let testURL = try #require(URL(string: "https://example.com/normalize"))
         let quotedETag = "\"abc123\""
         let unquotedETag = "abc123"
 
@@ -236,7 +236,7 @@ struct ETagCheckerTests {
     func caseInsensitiveETagHeader() async throws {
         MockURLProtocol.reset()
 
-        let testURL = URL(string: "https://example.com/case-test")!
+        let testURL = try #require(URL(string: "https://example.com/case-test"))
         let etagValue = "\"xyz789\""
 
         // Mock with lowercase "etag" (not "ETag")
@@ -262,7 +262,7 @@ struct ETagCheckerTests {
     func weakETagsSupported() async throws {
         MockURLProtocol.reset()
 
-        let testURL = URL(string: "https://example.com/weak-etag")!
+        let testURL = try #require(URL(string: "https://example.com/weak-etag"))
         let weakETag = "W/\"abc123\""
 
         // Store weak ETag

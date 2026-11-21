@@ -15,15 +15,17 @@ import SwiftUI
 struct AnimatedSecureTextField: View {
     @Binding var text: String
     @State var isSecure = true
-    var titleKey: String
+    var titleKey: LocalizedStringKey
+    var isFocused: FocusState<Bool>.Binding
     var body: some View {
         HStack(spacing: 4) {
             Button {
                 isSecure.toggle()
             } label: {
                 Image(systemSymbol: isSecure ? .eyeSlash : .eyeFill)
-                    .foregroundStyle(.gray)
+                    .foregroundStyle(Color.accentColor)
             }
+            .buttonStyle(.borderless)
             Spacer()
             HStack {
                 if isSecure {
@@ -31,11 +33,13 @@ struct AnimatedSecureTextField: View {
                         .textContentType(.password)
                         .multilineTextAlignment(.trailing) // Ensures text aligns to the right
                         .disableAutocorrection(true)
+                        .focused(isFocused)
                 } else {
                     TextField(titleKey, text: $text)
                         .textContentType(.password)
                         .multilineTextAlignment(.trailing) // Ensures text aligns to the right
                         .disableAutocorrection(true)
+                        .focused(isFocused)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .trailing) // Push to the right
@@ -48,11 +52,11 @@ struct AnimatedSecureTextField: View {
 #Preview {
     struct PreviewWrapper: View {
         @State private var password = "password12"
-        @State var isSecure = true
+        @FocusState private var isFocused: Bool
 
         var body: some View {
             Form {
-                AnimatedSecureTextField(text: $password, titleKey: "Enter Password")
+                AnimatedSecureTextField(text: $password, titleKey: "Enter Password", isFocused: $isFocused)
             }
             .padding()
         }

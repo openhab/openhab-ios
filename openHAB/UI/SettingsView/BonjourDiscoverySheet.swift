@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
@@ -17,7 +16,7 @@ import SwiftUI
 struct BonjourDiscoverySheet: View {
     @Binding var isPresented: Bool
     @Binding var connectionConfig: ConnectionConfiguration
-    @StateObject private var discovery = BonjourDiscoveryViewModel()
+    @State private var discovery = BonjourDiscoveryViewModel()
 
     var body: some View {
         NavigationStack {
@@ -96,24 +95,17 @@ struct BonjourDiscoverySheet: View {
     }
 }
 
-// **TODO Migrate to @Previewable on iOS 17
 #Preview {
-    struct PreviewWrapper: View {
-        @State private var isPresented = true
-        @State var connectionConfig = ConnectionConfiguration(
-            url: "https://openhab.local:8443",
-            username: "user",
-            password: "password123"
-        )
+    @Previewable @State var isPresented = true
+    @Previewable @State var connectionConfig = ConnectionConfiguration(
+        url: "https://openhab.local:8443",
+        username: "user",
+        password: "password123"
+    )
 
-        var body: some View {
-            NavigationStack {
-                Form {
-                    BonjourDiscoverySheet(isPresented: $isPresented, connectionConfig: $connectionConfig)
-                }
-            }
+    NavigationStack {
+        Form {
+            BonjourDiscoverySheet(isPresented: $isPresented, connectionConfig: $connectionConfig)
         }
     }
-
-    return PreviewWrapper()
 }

@@ -20,7 +20,7 @@ private struct TimestampModel: Decodable {
 struct DateFormattingTests {
     // MARK: - ISO8601 Date Parsing Tests
 
-    @Test func iSO8601DateParsingWithFractionalSeconds() throws {
+    @Test func iSO8601DateParsingWithFractionalSeconds() {
         let dateString = "2025-12-21T10:30:45.123+00:00"
         let date = try? Date(dateString, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
         #expect(date != nil)
@@ -39,37 +39,37 @@ struct DateFormattingTests {
         #expect(model2.timestamp.timeIntervalSince1970 > 0)
     }
 
-    @Test func iSO8601DateParsingWithZuluTimeZone() throws {
+    @Test func iSO8601DateParsingWithZuluTimeZone() {
         let dateString = "2025-12-21T10:30:45.123Z"
         let date = try? Date(dateString, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
         #expect(date != nil)
     }
 
-    @Test func iSO8601DateParsingWithPositiveTimeZone() throws {
+    @Test func iSO8601DateParsingWithPositiveTimeZone() {
         let dateString = "2025-12-21T10:30:45.123+05:30"
         let date = try? Date(dateString, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
         #expect(date != nil)
     }
 
-    @Test func iSO8601DateParsingWithNegativeTimeZone() throws {
+    @Test func iSO8601DateParsingWithNegativeTimeZone() {
         let dateString = "2025-12-21T10:30:45.123-08:00"
         let date = try? Date(dateString, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
         #expect(date != nil)
     }
 
-    @Test func iSO8601DateParsingWithMilliseconds() throws {
+    @Test func iSO8601DateParsingWithMilliseconds() {
         let dateString = "2025-12-21T10:30:45.999+00:00"
         let date = try? Date(dateString, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
         #expect(date != nil)
     }
 
-    @Test func iSO8601DateParsingWithInvalidFormat() throws {
+    @Test func iSO8601DateParsingWithInvalidFormat() {
         let dateString = "not a date"
         let date = try? Date(dateString, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
         #expect(date == nil)
     }
 
-    @Test func iSO8601DateParsingWithEmptyString() throws {
+    @Test func iSO8601DateParsingWithEmptyString() {
         let dateString = ""
         let date = try? Date(dateString, strategy: Date.ISO8601FormatStyle(includingFractionalSeconds: true))
         #expect(date == nil)
@@ -77,7 +77,7 @@ struct DateFormattingTests {
 
     // MARK: - ISO8601 Date Formatting Tests
 
-    @Test func iSO8601DateFormattingWithFractionalSeconds() throws {
+    @Test func iSO8601DateFormattingWithFractionalSeconds() {
         // Create a date with a known value
         let calendar = Calendar(identifier: .gregorian)
         var components = DateComponents()
@@ -103,7 +103,7 @@ struct DateFormattingTests {
         #expect(formatted.contains("10:30:45"))
     }
 
-    @Test func iSO8601DateRoundTrip() throws {
+    @Test func iSO8601DateRoundTrip() {
         // Test that formatting and parsing a date produces the same value (within millisecond precision)
         let calendar = Calendar(identifier: .gregorian)
         var components = DateComponents()
@@ -171,7 +171,7 @@ struct DateFormattingTests {
 
     @Test func dateTimeFormattingWithHourMinuteSecond() throws {
         var calendar = Calendar(identifier: .gregorian)
-        let tz = TimeZone(secondsFromGMT: 0)! // deterministic on CI
+        let tz = try #require(TimeZone(secondsFromGMT: 0)) // deterministic on CI
         calendar.timeZone = tz
 
         var components = DateComponents()
@@ -197,7 +197,7 @@ struct DateFormattingTests {
         #expect(formatted.contains("T14:30:45"))
     }
 
-    @Test func dateFormattingAbbreviated() throws {
+    @Test func dateFormattingAbbreviated() {
         let calendar = Calendar(identifier: .gregorian)
         var components = DateComponents()
         components.year = 2025
@@ -216,7 +216,7 @@ struct DateFormattingTests {
         #expect(!formatted.isEmpty)
     }
 
-    @Test func dateFormattingTimeOmitted() throws {
+    @Test func dateFormattingTimeOmitted() {
         let calendar = Calendar(identifier: .gregorian)
         var components = DateComponents()
         components.year = 2025
@@ -238,7 +238,7 @@ struct DateFormattingTests {
 
     // MARK: - Log Date Format Tests (en_US_POSIX)
 
-    @Test func logDateFormattingWithPOSIXLocale() throws {
+    @Test func logDateFormattingWithPOSIXLocale() {
         // Test date formatting with en_US_POSIX locale for consistent log output
         let date = Date()
 
@@ -261,7 +261,7 @@ struct DateFormattingTests {
         #expect(formatted.count > 15)
     }
 
-    @Test func logDateFormattingWithSingleDigitsPOSIXLocale() throws {
+    @Test func logDateFormattingWithSingleDigitsPOSIXLocale() {
         // Test with single digit month/day to verify two-digit padding
         let calendar = Calendar(identifier: .gregorian)
         var dateComponents = DateComponents()
@@ -294,7 +294,7 @@ struct DateFormattingTests {
         #expect(formatted.contains("2025"))
     }
 
-    @Test func logDateFormattingConsistencyWithPOSIXLocale() throws {
+    @Test func logDateFormattingConsistencyWithPOSIXLocale() {
         // Verify that en_US_POSIX locale produces consistent, non-localized output
         let date1 = Date()
         let date2 = Date()
@@ -330,7 +330,7 @@ struct DateFormattingTests {
 
     // MARK: - Screen Saver Time Format Tests
 
-    @Test func screenSaverTime24HourFormatWithLeadingZeros() throws {
+    @Test func screenSaverTime24HourFormatWithLeadingZeros() {
         // Test 24-hour format with leading zeros for screen saver
         let calendar = Calendar(identifier: .gregorian)
         var dateComponents = DateComponents()
@@ -356,7 +356,7 @@ struct DateFormattingTests {
         #expect(formatted.contains("03"))
     }
 
-    @Test func screenSaverTime12HourFormatNaturalStyle() throws {
+    @Test func screenSaverTime12HourFormatNaturalStyle() {
         // Test 12-hour format with natural style (no leading zero for hours)
         let calendar = Calendar(identifier: .gregorian)
         var dateComponents = DateComponents()
@@ -379,7 +379,7 @@ struct DateFormattingTests {
         #expect(formatted.contains("05")) // Minutes should be padded
     }
 
-    @Test func screenSaverTimeMidnightFormat() throws {
+    @Test func screenSaverTimeMidnightFormat() {
         // Test midnight (00:00:00) with 24-hour format
         let calendar = Calendar(identifier: .gregorian)
         var dateComponents = DateComponents()
@@ -403,7 +403,7 @@ struct DateFormattingTests {
         #expect(formatted.contains("00"))
     }
 
-    @Test func screenSaverTimeWithoutSeconds() throws {
+    @Test func screenSaverTimeWithoutSeconds() {
         // Test time format without seconds (HH:mm) - verify format structure
         let date = Date()
 
@@ -420,7 +420,7 @@ struct DateFormattingTests {
         #expect(formatted.count >= 5)
     }
 
-    @Test func screenSaverTime24HourVs12HourFormatting() throws {
+    @Test func screenSaverTime24HourVs12HourFormatting() {
         // Test the difference between 24-hour and 12-hour formatting
         let calendar = Calendar(identifier: .gregorian)
         var dateComponents = DateComponents()
@@ -458,7 +458,7 @@ struct DateFormattingTests {
 
     // MARK: - Notification Timestamp Format Tests
 
-    @Test func notificationTimestampWithLongDateStandardTime() throws {
+    @Test func notificationTimestampWithLongDateStandardTime() {
         // Test notification format with long date and standard time (closest to original DateFormatter medium)
         let calendar = Calendar(identifier: .gregorian)
         var dateComponents = DateComponents()
@@ -482,7 +482,7 @@ struct DateFormattingTests {
         // Exact format depends on locale, but should contain all components
     }
 
-    @Test func notificationTimestampIncludesSeconds() throws {
+    @Test func notificationTimestampIncludesSeconds() {
         // Verify that standard time format includes seconds (unlike shortened)
         let calendar = Calendar(identifier: .gregorian)
         var dateComponents = DateComponents()
@@ -503,7 +503,7 @@ struct DateFormattingTests {
         #expect(standardFormat.count >= shortenedFormat.count)
     }
 
-    @Test func notificationTimestampConsistentFormat() throws {
+    @Test func notificationTimestampConsistentFormat() {
         // Test that notification timestamps are formatted consistently
         let calendar = Calendar(identifier: .gregorian)
         var dateComponents = DateComponents()

@@ -10,9 +10,8 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-import Testing
-
 @testable import OpenHABCore
+import Testing
 
 // MARK: - Test Helpers
 

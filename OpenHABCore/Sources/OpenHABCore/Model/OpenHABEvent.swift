@@ -18,7 +18,7 @@ public struct OpenHABEvent: Decodable, Hashable, Sendable {
         case itemStateChangedEvent = "ItemStateChangedEvent"
     }
 
-    struct Payload: Decodable, Equatable, Hashable, Sendable {
+    struct Payload: Decodable, Equatable, Hashable {
         private enum CodingKeys: String, CodingKey {
             case type, value, oldType, oldValue, lastStateUpdate, lastStateChange
         }

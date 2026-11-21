@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import CommonUI
 import OpenHABCore
 import os.log
@@ -26,9 +25,9 @@ struct DebugSettingsView: View {
     var body: some View {
         Toggle("Crash Reporting", isOn: $settingsSendCrashReports)
             .task { @MainActor in
-                updateSettingsSendCrashReports(Preferences.shared.sendCrashReports)
+                await updateSettingsSendCrashReports(Preferences.shared.sendCrashReports)
             }
-            .onChange(of: settingsSendCrashReports) { newValue in
+            .onChange(of: settingsSendCrashReports) { _, newValue in
                 #if !DEBUG
                 Logger.settingsView.debug("Detected change on settingsSendCrashReports")
                 #endif
@@ -59,9 +58,11 @@ struct DebugSettingsView: View {
             }
         Section(header: Text(LocalizedStringKey("debug"))) {
             Toggle("Sitemap Diagnostics Logging", isOn: $settingsSitemapDiagnosticsLogging)
-                .onChange(of: settingsSitemapDiagnosticsLogging) { newValue in
-                    Preferences.shared.modifyApplicationPreferences { prefs in
-                        prefs.sitemapDiagnosticsLogging = newValue
+                .onChange(of: settingsSitemapDiagnosticsLogging) { _, newValue in
+                    Task {
+                        await Preferences.shared.modifyApplicationPreferences { prefs in
+                            prefs.sitemapDiagnosticsLogging = newValue
+                        }
                     }
                 }
             NavigationLink {

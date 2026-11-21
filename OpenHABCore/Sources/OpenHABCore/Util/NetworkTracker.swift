@@ -9,9 +9,9 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@preconcurrency import Combine
 import Foundation
 import Network
+import Observation
 import OpenAPIRuntime
 import os.log
 import Timeout
@@ -29,11 +29,33 @@ public struct ConnectionInfo: Equatable, Sendable {
     public let version: Int
     public let proxyURL: URL?
 
-    // Explicit public memberwise initializer
+    /// Explicit public memberwise initializer
     public init(configuration: ConnectionConfiguration, version: Int, proxyURL: URL? = nil) {
         self.configuration = configuration
         self.version = version
         self.proxyURL = proxyURL
+    }
+}
+
+/// A snapshot of the network tracker's observable state, delivered as a single value so
+/// consumers observe one coherent update rather than reconciling several parallel streams.
+public struct NetworkState: Equatable, Sendable, CustomStringConvertible {
+    public let activeConnection: ConnectionInfo?
+    public let status: NetworkStatus
+    /// When another connection attempt is scheduled, the time it will fire; `nil` otherwise.
+    public let nextRetryDate: Date?
+    /// Whether the device currently has a usable network path.
+    public let isNetworkAvailable: Bool
+
+    public var description: String {
+        "status: \(status.rawValue), activeConnection: \(activeConnection?.configuration.description ?? "nil"), next retry: \(nextRetryDate?.description ?? "nil"), network available: \(isNetworkAvailable ? "yes" : "no")"
+    }
+
+    public init(activeConnection: ConnectionInfo?, status: NetworkStatus, nextRetryDate: Date?, isNetworkAvailable: Bool) {
+        self.activeConnection = activeConnection
+        self.status = status
+        self.nextRetryDate = nextRetryDate
+        self.isNetworkAvailable = isNetworkAvailable
     }
 }
 
@@ -51,14 +73,14 @@ public enum NetworkTrackerError: Error, CustomDebugStringConvertible, Sendable {
     }
 }
 
-// Prevent race conditions.
-// Ensure thread-safe dictionary access.
-// Avoid memory corruption errors like unrecognized selector.
+/// Prevent race conditions.
+/// Ensure thread-safe dictionary access.
+/// Avoid memory corruption errors like unrecognized selector.
 public actor ConnectionPool {
     private var services: [ConnectionConfiguration: any OpenAPIServiceProtocol] = [:]
     private let serviceFactory: @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol
 
-    // Initializer allowing the injection of mocked OpenAPIServiceProtocol
+    /// Initializer allowing the injection of mocked OpenAPIServiceProtocol
     init(serviceFactory: @escaping @Sendable (ConnectionConfiguration) throws -> any OpenAPIServiceProtocol = {
         try OpenAPIService(connectionConfiguration: $0, serviceConfiguration: .shortTerm)
     }) {
@@ -77,7 +99,7 @@ public actor ConnectionPool {
     }
 }
 
-// Ensures a thread safe access to failureCounts dictionary
+/// Ensures a thread safe access to failureCounts dictionary
 public actor ConnectionFailureTracker {
     private var enabled = false
     private var failureCounts: [ConnectionConfiguration: Int] = [:]
@@ -91,8 +113,8 @@ public actor ConnectionFailureTracker {
         let connectionsBefore = failureCounts.keys
         Logger.connectionFailureTracker.info("""
         ConnectionFailureTracker: Setting connections for failure tracker.
-            Old connections: \(connectionsBefore.sorted(by: \.url).map(\.publicLogDescription), privacy: .public)
-            New connections: \(connections.sorted(by: \.url).map(\.publicLogDescription), privacy: .public)
+            Old connections: \(connectionsBefore.sorted(by: \.url).map { "\($0)" }, privacy: .private)
+            New connections: \(connections.sorted(by: \.url).map { "\($0)" }, privacy: .private)
         """)
 
         failureCounts = failureCounts.filter { connections.contains($0.key) }
@@ -102,7 +124,7 @@ public actor ConnectionFailureTracker {
         }
 
         let connectionsAfter = failureCounts.keys
-        Logger.connectionFailureTracker.debug("ConnectionFailureTracker: Connections after update: \(connectionsAfter.sorted(by: \.url).map(\.publicLogDescription), privacy: .public)")
+        Logger.connectionFailureTracker.debug("ConnectionFailureTracker: Connections after update: \(connectionsAfter.sorted(by: \.url).map { "\($0)" }, privacy: .private)")
     }
 
     func shouldAttempt(_ config: ConnectionConfiguration) -> Bool {
@@ -111,15 +133,15 @@ public actor ConnectionFailureTracker {
 
     func recordFailure(_ config: ConnectionConfiguration) {
         guard enabled else {
-            Logger.connectionFailureTracker.debug("ConnectionFailureTracker: Do not record failure while being disabled for connection \(config.publicLogDescription, privacy: .public)")
+            Logger.connectionFailureTracker.debug("ConnectionFailureTracker: Do not record failure while being disabled for connection url \(config.url) user: \(config.username, privacy: .private)")
             return
         }
-        Logger.connectionFailureTracker.debug("ConnectionFailureTracker: Record failure for connection \(config.publicLogDescription, privacy: .public)")
+        Logger.connectionFailureTracker.debug("ConnectionFailureTracker: Record failure for connection url \(config.url) user: \(config.username, privacy: .private)")
         failureCounts[config, default: 0] += 1
     }
 
     func reset(_ config: ConnectionConfiguration) {
-        Logger.connectionFailureTracker.debug("ConnectionFailureTracker: Reset failures for connection \(config.publicLogDescription, privacy: .public)")
+        Logger.connectionFailureTracker.debug("ConnectionFailureTracker: Reset failures for connection url \(config.url) user: \(config.username)")
         failureCounts[config] = 0
     }
 
@@ -134,20 +156,21 @@ public actor ConnectionFailureTracker {
 }
 
 @MainActor
-public class MainActorNetworkTracker: ObservableObject {
+@Observable
+public final class MainActorNetworkTracker {
     public static let shared = MainActorNetworkTracker()
-    @Published public var activeConnection: ConnectionInfo?
-    @Published public var status: NetworkStatus = .stopped
+    public var activeConnection: ConnectionInfo?
+    public var status: NetworkStatus = .stopped
+    public var nextRetryDate: Date?
+    public var isNetworkAvailable = true
 
     public init(tracker: NetworkTracker = NetworkTracker.shared) {
         Task {
-            for await connection in await tracker.activeConnectionStream() {
-                activeConnection = connection
-            }
-        }
-        Task {
-            for await trackerStatus in await tracker.statusStream() {
-                status = trackerStatus
+            for await state in await tracker.stateStream() {
+                activeConnection = state.activeConnection
+                status = state.status
+                nextRetryDate = state.nextRetryDate
+                isNetworkAvailable = state.isNetworkAvailable
             }
         }
     }
@@ -165,9 +188,21 @@ public actor NetworkTracker {
     public static let networkTimeout: TimeInterval = 10
     public static let slowConnectionTimeout: TimeInterval = 1
 
-    @Published public private(set) var activeConnection: ConnectionInfo?
+    public private(set) var activeConnection: ConnectionInfo?
+    public private(set) var status: NetworkStatus = .stopped
 
-    @Published public private(set) var status: NetworkStatus = .stopped
+    /// When a connection attempt has failed and another attempt is scheduled, the wall-clock
+    /// time that retry will fire; `nil` while connecting/connected or once tracking has given
+    /// up. Lets the UI count down to the next attempt.
+    public private(set) var nextRetryDate: Date?
+
+    /// Whether the device currently has a usable network path. `false` means retries are
+    /// abandoned until the network returns; lets the UI distinguish "no network" from
+    /// "server unreachable".
+    public private(set) var isNetworkAvailable = true
+
+    /// Registered observers: each call to stateStream() gets its own continuation entry.
+    private var stateContinuations: [UUID: AsyncStream<NetworkState>.Continuation] = [:]
 
     private var pathMonitor: any NWPathMonitoring
     private var connectionPool: ConnectionPool
@@ -193,11 +228,12 @@ public actor NetworkTracker {
 
     /// Creates a task to start the tracking and returns immediately
     public func startTracking(connectionConfigurations: [ConnectionConfiguration]) async {
-        Logger.networkTracker.info("NetworkTracker: Start Network Tracking for \(connectionConfigurations.sorted(by: \.url).map(\.publicLogDescription), privacy: .public)")
+        Logger.networkTracker.info("NetworkTracker: Start Network Tracking for \(connectionConfigurations.sorted(by: \.url).map { "\($0)" }, privacy: .private)")
 
         let status = status // to prevent linter removing "self" in string interpolation
         guard status == .stopped || Set(connectionConfigurations) != Set(self.connectionConfigurations) else {
-            Logger.networkTracker.warning("NetworkTracker: Network tracking for these connections has already been started, current status: \(status.rawValue, privacy: .public)")
+            // Callers start tracking whenever they need it; a repeat for the same connections is routine.
+            Logger.networkTracker.debug("NetworkTracker: tracking already running for these connections, status: \(status.rawValue, privacy: .public)")
             return
         }
 
@@ -210,18 +246,18 @@ public actor NetworkTracker {
         self.connectionConfigurations = connectionConfigurations
         setActiveConnection(nil)
 
-        Task(priority: .userInitiated) {
+        Task(priority: .userInitiated) { [self] in
             for configuration in connectionConfigurations {
                 do {
                     _ = try await connectionPool.getOrCreateService(for: configuration)
                 } catch {
-                    Logger.networkTracker.error("NetworkTracker: Failed to create service for config: \(configuration.publicLogDescription, privacy: .public) — \(error.localizedDescription, privacy: .public)")
+                    Logger.networkTracker.error("NetworkTracker: Failed to create service for config: \(configuration.url, privacy: .public) — \(error.localizedDescription)")
                     // Optionally: show a UI popup or skip to next config
                 }
             }
             await attemptConnection()
 
-            await self.pathMonitor.startMonitoring { [weak self] isConnected in
+            await pathMonitor.startMonitoring { [weak self] isConnected in
                 await self?.handleNetworkChange(isConnected: isConnected)
             }
         }
@@ -230,6 +266,7 @@ public actor NetworkTracker {
     public func stopTracking() async {
         retryTask?.cancel()
         retryTask = nil
+        nextRetryDate = nil
         pathMonitor.cancel()
         setActiveConnection(nil)
         await failureTracker.resetAll()
@@ -244,18 +281,12 @@ public actor NetworkTracker {
         }
 
         Logger.networkTracker.info("NetworkTracker: waitForActiveConnection")
-        // Utilize for await to listen for changes in $activeConnection
-        // $activeConnection.values is an AsyncSequence, allowing you to iterate over its values asynchronously.
-        // Wait until a non-nil value is received
+        // stateStream() replays the current state immediately, so the loop returns
+        // right away when already connected and waits for the next change otherwise.
         return try? await withThrowingTimeout(seconds: networkTimeout) { [self] in
             Logger.networkTracker.info("NetworkTracker: Start waiting for active connection connection with timeout")
-            let activeConnections = $activeConnection.values
-            if status == .connected {
-                // return existing conneciton
-                if let current = activeConnection { return current }
-            }
-            for await connection in activeConnections {
-                if let connection {
+            for await state in stateStream() {
+                if let connection = state.activeConnection {
                     Logger.networkTracker.info("NetworkTracker: active connection received")
                     return connection
                 }
@@ -264,7 +295,7 @@ public actor NetworkTracker {
         }
     }
 
-    // like startTracking but with the already configured connections and a fresh approach
+    /// like startTracking but with the already configured connections and a fresh approach
     public func restartTracking() async {
         Logger.networkTracker.debug("Networktracker: restartTracking")
         await failureTracker.resetAll() // just to make sure a few more connection attempts happen if necessary
@@ -274,14 +305,16 @@ public actor NetworkTracker {
         await startTracking(connectionConfigurations: connectionConfigurations)
     }
 
-    // This gets called periodically when we have an active connection to make sure it's still the best choice
+    /// This gets called periodically when we have an active connection to make sure it's still the best choice
     private func checkActiveConnection() async {
         guard status != .stopped else {
             return
         }
 
         guard let activeConnection else {
-            // No active connection, proceed with the normal connection attempt
+            // No active connection, proceed with the normal connection attempt. This runs only
+            // on a meaningful network change (the path monitor filters out quality-only noise),
+            // so attempting now — and letting it reschedule the backoff — is appropriate.
             Logger.networkTracker.info("NetworkTracker: No active connection, attempting to reconnect...")
             await attemptConnection(silent: true)
             return
@@ -324,6 +357,7 @@ public actor NetworkTracker {
     private func makeBestConnectionActive() async {
         if let bestConnection = await findBestConnection() {
             Logger.networkTracker.info("NetworkTracker: Best connection \(bestConnection.configuration.publicLogDescription, privacy: .public)")
+            nextRetryDate = nil
             setActiveConnection(bestConnection)
             updateStatus(.connected)
         } else {
@@ -364,11 +398,21 @@ public actor NetworkTracker {
 
             var currentBestConnection: ConnectionInfo?
             var gracePeriodStarted = false
+            var pendingConnectionCount = sortedConfigs.count
 
             while let result = await group.next() {
                 switch result {
                 case let .connection(connectionInfo):
-                    guard let connectionInfo else { continue }
+                    guard let connectionInfo else {
+                        pendingConnectionCount -= 1
+                        // All connections failed with no candidate found — cancel the timeout sentinel
+                        // and return immediately rather than waiting up to networkTimeout seconds.
+                        if pendingConnectionCount == 0, currentBestConnection == nil {
+                            group.cancelAll()
+                            return nil
+                        }
+                        continue
+                    }
 
                     if currentBestConnection == nil {
                         Logger.networkTracker.debug("NetworkTracker: First working connection found: \(connectionInfo.configuration.publicLogDescription, privacy: .public)")
@@ -376,12 +420,14 @@ public actor NetworkTracker {
                         if connectionInfo.configuration.priority == 0 {
                             Logger.networkTracker.debug("NetworkTracker: Most prioritized connection \(connectionInfo.configuration.publicLogDescription, privacy: .public) tested successfully")
                             group.cancelAll()
-                            let bestConnectionDescription = currentBestConnection?.configuration.publicLogDescription ?? "none"
-                            Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionDescription, privacy: .public)")
+                            Logger.networkTracker.debug("NetworkTracker: Best connection: \(connectionInfo.configuration.publicLogDescription, privacy: .public)")
                             return currentBestConnection
                         }
                         if !gracePeriodStarted {
                             gracePeriodStarted = true
+                            // Grace window: give remaining connections a short time to respond.
+                            // Adding this as a child task ensures group.cancelAll() propagates into
+                            // slow connections when the window fires
                             group.addTask {
                                 try? await Task.sleep(for: .seconds(NetworkTracker.slowConnectionTimeout))
                                 return .gracePeriodExpired
@@ -396,28 +442,30 @@ public actor NetworkTracker {
                         Logger.networkTracker.debug("NetworkTracker: Most prioritized connection \(connectionInfo.configuration.publicLogDescription, privacy: .public) tested successfully")
                         // Stop further tasks if we found the highest-priority connection and return it
                         group.cancelAll()
-                        let bestConnectionDescription = currentBestConnection?.configuration.publicLogDescription ?? "none"
-                        Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionDescription, privacy: .public)")
+                        let bestConnectionUrl = currentBestConnection?.configuration.publicLogDescription ?? "none"
+                        Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionUrl)")
                         return currentBestConnection
                     }
+
                 case .gracePeriodExpired:
                     guard currentBestConnection != nil else { continue }
                     Logger.networkTracker.debug("NetworkTracker: Preferred connection grace period expired")
                     group.cancelAll()
-                    let bestConnectionDescription = currentBestConnection?.configuration.publicLogDescription ?? "none"
-                    Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionDescription, privacy: .public)")
+                    let bestConnectionUrl = currentBestConnection?.configuration.publicLogDescription ?? "none"
+                    Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionUrl)")
                     return currentBestConnection
+
                 case .networkTimeoutExpired:
                     Logger.networkTracker.debug("NetworkTracker: Connection search timeout expired")
                     group.cancelAll()
-                    let bestConnectionDescription = currentBestConnection?.configuration.publicLogDescription ?? "none"
-                    Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionDescription, privacy: .public)")
+                    let bestConnectionUrl = currentBestConnection?.configuration.publicLogDescription ?? "none"
+                    Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionUrl)")
                     return currentBestConnection
                 }
             }
 
-            let bestConnectionDescription = currentBestConnection?.configuration.publicLogDescription ?? "none"
-            Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionDescription, privacy: .public)")
+            let bestConnectionUrl = currentBestConnection?.configuration.publicLogDescription ?? "none"
+            Logger.networkTracker.debug("NetworkTracker: Best connection: \(bestConnectionUrl)")
             return currentBestConnection
         }
     }
@@ -437,7 +485,9 @@ public actor NetworkTracker {
         do {
             let (data, _) = try await URLSession.shared.data(for: request)
             let json = try JSONDecoder().decode([String: String].self, from: data)
-            if let urlString = json["url"] { return URL(string: urlString) }
+            if let urlString = json["url"] {
+                return URL(string: urlString)
+            }
         } catch {
             Logger.networkTracker.info("NetworkTracker: Failed to fetch proxyURL: \(error.localizedDescription)")
         }
@@ -475,16 +525,16 @@ public actor NetworkTracker {
             await failureTracker.recordFailure(configuration)
             switch error {
             case let .undocumented(statusCode, payload):
-                Logger.networkTracker.info("NetworkTracker: Undocumented status code: \(statusCode, privacy: .public), payload: \(String(describing: payload), privacy: .public)")
+                Logger.networkTracker.info("NetworkTracker: Undocumented status code: \(statusCode), payload: \(String(describing: payload))")
             default: break
             }
         } catch let openAPIError as OpenAPIRuntime.ClientError {
             await failureTracker.recordFailure(configuration)
             Logger.networkTracker.info("Networktracker: testConnection error - OpenAPIRuntime.RuntimeError encountered for \(configuration.publicLogDescription, privacy: .public)")
-            Logger.networkTracker.debug("OpenAPIRuntime.RuntimeError is \(String(describing: openAPIError), privacy: .public)")
+            Logger.networkTracker.debug("OpenAPIRuntime.RuntimeError is \(openAPIError)")
         } catch {
             await failureTracker.recordFailure(configuration)
-            Logger.networkTracker.info("NetworkTracker: testConnection error - Failed to connect to \(configuration.publicLogDescription, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            Logger.networkTracker.info("NetworkTracker: testConnection error - Failed to connect to \(configuration.publicLogDescription, privacy: .public) \(error.localizedDescription)")
         }
 
         return nil
@@ -495,21 +545,37 @@ public actor NetworkTracker {
         retryTask?.cancel()
         // prevent all non-retry failures from being recorded
         await failureTracker.setEnabled(false)
+        let failureCount = await failureTracker.maxFailureCount()
+        let backoffMultiplier = UInt64(failureCount)
+        let safeBackoff = min(backoffMultiplier, 10) // 2^10 = 1024
+        let delay = min(initialRetryInterval * (1 << safeBackoff), 300)
+        Logger.networkTracker.info("NetworkTracker: Retrying connection in \(delay) seconds based on failure count of \(failureCount).")
+        // Publish the retry deadline so the UI can count down to it.
+        nextRetryDate = Date().addingTimeInterval(TimeInterval(delay))
+        yieldCurrentState()
         retryTask = Task { [weak self] in
-            guard let self else { return }
-            let failureCount = await failureTracker.maxFailureCount()
-            let backoffMultiplier = UInt64(failureCount)
-            let safeBackoff = min(backoffMultiplier, 10) // 2^10 = 1024
-            let delay = min(initialRetryInterval * (1 << safeBackoff), 300)
-            Logger.networkTracker.info("NetworkTracker: Retrying connection in \(delay, privacy: .public) seconds based on failure count of \(failureCount, privacy: .public).")
             try? await Task.sleep(for: .seconds(delay))
-            guard !Task.isCancelled else {
-                return
-            }
-            // allow recording of failures due to this task
-            await failureTracker.setEnabled(true)
-            await attemptConnection()
+            guard !Task.isCancelled else { return }
+            await self?.beginScheduledRetry()
         }
+    }
+
+    /// Runs when a scheduled retry fires: clears the retry deadline and re-attempts,
+    /// allowing failures from this attempt to be recorded again.
+    private func beginScheduledRetry() async {
+        nextRetryDate = nil
+        yieldCurrentState()
+        await failureTracker.setEnabled(true)
+        await attemptConnection()
+    }
+
+    /// Clears the active connection and rediscovers the best available one.
+    /// Use after a transport failure to recover from a stale connection (e.g. network switched while process was suspended).
+    private func revalidateConnection() async {
+        Logger.networkTracker.info("NetworkTracker: Re-evaluating connection after transport failure")
+        setActiveConnection(nil)
+        await failureTracker.resetAll()
+        await attemptConnection()
     }
 
     /// keep trying to connect when network is not connected, otherwise check if active connection is actually available
@@ -518,32 +584,54 @@ public actor NetworkTracker {
             return
         }
 
-        Logger.networkTracker.info("NetworkTracker: Networkmonitor status: \(isConnected ? "connected" : "disconnected", privacy: .public)")
-        await checkActiveConnection()
+        Logger.networkTracker.info("NetworkTracker: Networkmonitor status: \(isConnected ? "connected" : "disconnected")")
+        isNetworkAvailable = isConnected
+        yieldCurrentState()
 
-        if activeConnection == nil {
-            // don´t retry until we have a network connection again
+        // Network is down: abandon the backoff retry — there is no point hammering a dead
+        // interface, and the next network-up event will drive a fresh attempt.
+        guard isConnected else {
             retryTask?.cancel()
+            nextRetryDate = nil
+            yieldCurrentState()
+            return
         }
+
+        await checkActiveConnection()
     }
 
     private func setActiveConnection(_ connection: ConnectionInfo?) {
         guard status != .stopped else {
             if activeConnection != nil {
                 activeConnection = nil
+                yieldCurrentState()
             }
             return
         }
 
         if activeConnection != connection {
             activeConnection = connection
+            yieldCurrentState()
         }
     }
 
     private func updateStatus(_ newStatus: NetworkStatus) {
         guard status != newStatus else { return } // Prevent redundant updates
         status = newStatus
-        Logger.networkTracker.info("NetworkTracker: status updated: \(newStatus.rawValue, privacy: .public)")
+        Logger.networkTracker.info("NetworkTracker: status updated: \(newStatus.rawValue)")
+        yieldCurrentState()
+    }
+
+    private func yieldCurrentState() {
+        let state = NetworkState(activeConnection: activeConnection, status: status, nextRetryDate: nextRetryDate, isNetworkAvailable: isNetworkAvailable)
+        Logger.networkTracker.debug("NetworkTracker: yielding state \(state)")
+        for cont in stateContinuations.values {
+            cont.yield(state)
+        }
+    }
+
+    private func removeStateContinuation(id: UUID) {
+        stateContinuations.removeValue(forKey: id)
     }
 }
 
@@ -575,21 +663,48 @@ public extension NetworkTracker {
         try await send(to: item.name, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
     }
 
+    /// Retries once after revalidating the connection on two transient failure kinds:
+    ///  • ClientError  — transport failure against a stale connection (network switch, suspension)
+    ///  • noActiveConnection — all connection tests timed out during a network handoff; the
+    ///    tracker recovers shortly after, so one revalidation + retry is enough.
+    private func withClientErrorRetry<T>(_ operation: () async throws -> T) async throws -> T {
+        do {
+            return try await operation()
+        } catch is OpenAPIRuntime.ClientError {
+            await revalidateConnection()
+            return try await operation()
+        } catch NetworkTrackerError.noActiveConnection {
+            await revalidateConnection()
+            return try await operation()
+        }
+    }
+
     func send(to item: String, command: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
-        try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        try await withClientErrorRetry {
+            try await service().sendItemCommand(itemname: item, command: command, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        }
     }
 
     func updateState(item: OpenHABItem, state: String, sourcePrefix: String? = nil, deviceId: String? = nil) async throws {
-        try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        try await withClientErrorRetry {
+            try await service().updateItemState(itemname: item.name, with: state, sourcePrefix: sourcePrefix, deviceId: deviceId)
+        }
     }
 
     func getStaticItems() async throws -> [OpenHABItem] {
-        let items = try await service().getItems(query: Operations.getItems.Input.Query(staticDataOnly: true))
-        return items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        try await withClientErrorRetry {
+            // staticDataOnly=true is intentionally omitted: it excludes dynamically-created
+            // items (e.g. Shelly binding channel items), causing them to be missing from the
+            // App Intents item cache and triggering re-prompts in Shortcuts.
+            let items = try await service().getItems(query: Operations.getItems.Input.Query())
+            return items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        }
     }
 
     func getItemByName(id: String) async throws -> OpenHABItem? {
-        try await service().getItemByName(id: id)
+        try await withClientErrorRetry {
+            try await service().getItemByName(id: id)
+        }
     }
 
     func pollDataForPage(sitemapname: String, pageId: String = "", longPolling: Bool = false) async throws -> OpenHABPage? {
@@ -602,22 +717,21 @@ public extension NetworkTracker {
 }
 
 public extension NetworkTracker {
-    func activeConnectionStream() -> AsyncStream<ConnectionInfo?> {
-        AsyncStream { continuation in
-            let cancellable = self.$activeConnection
-                .sink { continuation.yield($0) }
-
-            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
+    /// A single stream combining active connection, status and the retry deadline, so a
+    /// consumer receives one coherent `NetworkState` per change instead of interleaving
+    /// several streams.
+    /// Returns an AsyncStream that immediately yields the current NetworkState,
+    /// then yields a fresh coherent snapshot on every subsequent change.
+    /// Safe to call from any Swift concurrent context.
+    func stateStream() -> AsyncStream<NetworkState> {
+        let id = UUID()
+        let (stream, continuation) = AsyncStream.makeStream(of: NetworkState.self)
+        stateContinuations[id] = continuation
+        continuation.yield(NetworkState(activeConnection: activeConnection, status: status, nextRetryDate: nextRetryDate, isNetworkAvailable: isNetworkAvailable))
+        continuation.onTermination = { [weak self] _ in
+            Task { [weak self] in await self?.removeStateContinuation(id: id) }
         }
-    }
-
-    func statusStream() -> AsyncStream<NetworkStatus> {
-        AsyncStream { continuation in
-            let cancellable = self.$status
-                .sink { continuation.yield($0) }
-
-            continuation.onTermination = { [cancellable] _ in cancellable.cancel() }
-        }
+        return stream
     }
 }
 

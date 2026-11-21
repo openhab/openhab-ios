@@ -26,6 +26,19 @@ struct MediaRowView: View {
     }
 
     var body: some View {
+        let content = mediaContent
+        if let link = input.linkedPageLink {
+            NavigationLink(value: LinkedPageNavigation(pageLink: link, pageTitle: input.linkedPageTitle ?? "")) {
+                content
+            }
+            .buttonStyle(.plain)
+        } else {
+            content
+        }
+    }
+
+    @ViewBuilder
+    private var mediaContent: some View {
         switch input.renderingKind {
         case .image, .chart:
             ImageRowView(input: input)

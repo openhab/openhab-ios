@@ -221,7 +221,7 @@ open class Snapshot: NSObject {
         return
         #endif
 
-        guard let app else {
+            guard let app else {
             NSLog("XCUIApplication is not set. Please call setupSnapshot(app) before snapshot().")
             return
         }
@@ -252,7 +252,9 @@ open class Snapshot: NSObject {
 
 private extension XCUIElementAttributes {
     var isNetworkLoadingIndicator: Bool {
-        if hasAllowListedIdentifier { return false }
+        if hasAllowListedIdentifier {
+            return false
+        }
 
         let hasOldLoadingIndicatorSize = frame.size == CGSize(width: 10, height: 20)
         let hasNewLoadingIndicatorSize = frame.size.width.isBetween(46, and: 47) && frame.size.height.isBetween(2, and: 3)
@@ -267,7 +269,9 @@ private extension XCUIElementAttributes {
     }
 
     func isStatusBar(_ deviceWidth: CGFloat) -> Bool {
-        if elementType == .statusBar { return true }
+        if elementType == .statusBar {
+            return true
+        }
         guard frame.origin == .zero else { return false }
 
         let oldStatusBarSize = CGSize(width: deviceWidth, height: 20)

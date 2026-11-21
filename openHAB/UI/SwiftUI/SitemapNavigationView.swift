@@ -13,23 +13,89 @@ import CommonUI
 import OpenHABCore
 import SFSafeSymbols
 import SwiftUI
+import UIKit
+
+// MARK: - Navigation state
+
+enum SitemapNavigationState: Equatable {
+    case loading
+    case ready([LinkedPageNavigation])
+
+    var navigationPath: [LinkedPageNavigation] {
+        if case let .ready(path) = self {
+            return path
+        }
+        return []
+    }
+}
+
+// MARK: - Native UISearchBar wrapper for iOS 26 (reliable bottom placement)
+
+@available(iOS 26.0, *)
+private struct NativeSearchBar: UIViewRepresentable {
+    final class Coordinator: NSObject, UISearchBarDelegate {
+        var parent: NativeSearchBar
+
+        init(_ parent: NativeSearchBar) {
+            self.parent = parent
+        }
+
+        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+            parent.text = searchText
+        }
+
+        func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+            parent.text = ""
+            parent.isPresented = false
+            searchBar.resignFirstResponder()
+        }
+
+        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+            searchBar.resignFirstResponder()
+        }
+    }
+
+    @Binding var text: String
+    @Binding var isPresented: Bool
+    var placeholder: String
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    func makeUIView(context: Context) -> UISearchBar {
+        let bar = UISearchBar()
+        bar.searchBarStyle = .minimal
+        bar.placeholder = placeholder
+        bar.autocorrectionType = .no
+        bar.autocapitalizationType = .none
+        bar.showsCancelButton = true
+        bar.delegate = context.coordinator
+        bar.becomeFirstResponder()
+        return bar
+    }
+
+    func updateUIView(_ uiView: UISearchBar, context: Context) {
+        if uiView.text != text {
+            uiView.text = text
+        }
+    }
+}
 
 struct SitemapNavigationView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject var viewModel = SitemapPageViewModel()
     @State private var hasSeenActivePhase = false
     @State private var isSearchPresented = false
-    @FocusState private var isLegacySearchFocused: Bool
-    let onShowSideMenu: () -> Void
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $viewModel.navigationPath) {
             sitemapContent
                 .navigationDestination(for: LinkedPageNavigation.self) { nav in
                     SitemapPageView(viewModel: SitemapPageViewModel(pageUrl: nav.pageLink, title: nav.pageTitle))
                 }
         }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
                 // Skip only the first activation to avoid racing the initial .task startup.
@@ -59,104 +125,46 @@ struct SitemapNavigationView: View {
                 }
                 if viewModel.showSearchField {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        if #available(iOS 17.0, *) {
-                            Button {
-                                isSearchPresented = true
-                            } label: {
-                                Image(systemSymbol: .magnifyingglass)
-                            }
-                            .ohMinimumHitTarget()
-                            .accessibilityLabel("Search")
-                        } else {
-                            Button {
-                                isSearchPresented = true
-                                isLegacySearchFocused = true
-                            } label: {
-                                Image(systemSymbol: .magnifyingglass)
-                            }
-                            .ohMinimumHitTarget()
-                            .accessibilityLabel("Search")
+                        Button {
+                            isSearchPresented = true
+                        } label: {
+                            Image(systemSymbol: .magnifyingglass)
                         }
+                        .accessibilityLabel("Search")
                     }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        onShowSideMenu()
-                    } label: {
-                        Image(systemSymbol: .line3Horizontal)
-                            .font(.title)
-                    }
-                    .ohMinimumHitTarget()
                 }
             }
 
-        if viewModel.showSearchField {
-            if #available(iOS 17.0, *) {
-                if isSearchPresented {
-                    page
-                        .searchable(
+        if #available(iOS 26.0, *) {
+            // iOS 26: always apply safeAreaInset so SitemapPageView stays in the same
+            // structural branch regardless of showSearchField — preventing .onDisappear
+            // from firing and cancelling the active page-handling task when the setting
+            // changes. The inset is empty when search is not active.
+            page
+                .safeAreaInset(edge: .bottom) {
+                    if viewModel.showSearchField, isSearchPresented {
+                        NativeSearchBar(
                             text: $viewModel.searchText,
                             isPresented: $isSearchPresented,
-                            placement: .navigationBarDrawer(displayMode: .always),
-                            prompt: Text(String(localized: "search_items", comment: ""))
+                            placeholder: String(localized: "search_items", comment: "")
                         )
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                } else {
-                    page
-                }
-            } else {
-                page
-                    .safeAreaInset(edge: .bottom) {
-                        if isSearchPresented {
-                            legacySearchBar
-                        }
+                        .frame(height: 56)
                     }
-            }
+                }
+        } else if viewModel.showSearchField {
+            // iOS 17–25: native .searchable at the top
+            page
+                .searchable(
+                    text: $viewModel.searchText,
+                    isPresented: $isSearchPresented,
+                    placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: Text(String(localized: "search_items", comment: ""))
+                )
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
         } else {
             page
         }
-    }
-
-    private var legacySearchBar: some View {
-        HStack(spacing: 8) {
-            Image(systemSymbol: .magnifyingglass)
-                .foregroundStyle(.secondary)
-                .ohTextToken(.secondary)
-
-            TextField(String(localized: "search_items", comment: ""), text: $viewModel.searchText)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .focused($isLegacySearchFocused)
-                .ohTextToken(.secondary)
-
-            if !viewModel.searchText.isEmpty {
-                Button {
-                    viewModel.searchText = ""
-                } label: {
-                    Image(systemSymbol: .xmarkCircleFill)
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-            }
-
-            Button {
-                isSearchPresented = false
-                isLegacySearchFocused = false
-            } label: {
-                Image(systemSymbol: .xmark)
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(
-            Color(.secondarySystemBackground).opacity(0.6),
-            in: RoundedRectangle(cornerRadius: 10)
-        )
-        .padding(.horizontal, 12)
-        .padding(.bottom, 6)
     }
 
     @ViewBuilder
@@ -219,14 +227,16 @@ struct SitemapNavigationView: View {
         return false
     }
 
-    init(viewModel: SitemapPageViewModel, onShowSideMenu: @escaping () -> Void) {
+    init(viewModel: SitemapPageViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
-        self.onShowSideMenu = onShowSideMenu
     }
 
-    init(onShowSideMenu: @escaping () -> Void = {}) {
+    init(sitemapName: String, navigationPath: [LinkedPageNavigation] = []) {
+        _viewModel = StateObject(wrappedValue: SitemapPageViewModel(sitemapName: sitemapName, initialNavigationPath: navigationPath))
+    }
+
+    init() {
         _viewModel = StateObject(wrappedValue: SitemapPageViewModel())
-        self.onShowSideMenu = onShowSideMenu
     }
 }
 
@@ -236,8 +246,6 @@ struct SitemapNavigationView: View {
         pageUrl: PreviewConstants.openHABSitemapPage?.link ?? "",
         title: PreviewConstants.openHABSitemapPage?.title ?? "Preview Page"
     )
-    SitemapNavigationView(viewModel: previewViewModel) {
-        print("Show side menu tapped")
-    }
+    SitemapNavigationView(viewModel: previewViewModel)
 }
 #endif

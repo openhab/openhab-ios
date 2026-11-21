@@ -12,13 +12,14 @@
 // Inspired by https://www.avanderlee.com/debugging/oslog-unified-logging/
 
 import Foundation
-
 import os.log
 
 public extension Logger {
     private static let subsystem = Bundle.main.bundleIdentifier ?? "org.openhab.app"
 
     static let appDelegate = Logger(subsystem: subsystem, category: "AppDelegate")
+
+    static let carPlay = Logger(subsystem: subsystem, category: "CarPlay")
 
     static let clientCert = Logger(subsystem: subsystem, category: "ClientCert")
 
@@ -48,6 +49,11 @@ public extension Logger {
 
     static let notificationCenterDelegateImpl = Logger(subsystem: subsystem, category: "NotificationCenterDelegateImpl")
 
+    /// Traces a notification tap's onClickAction from parsing through to the actual
+    /// WKWebView load, so a race between it and OpenHABWebViewModel's own
+    /// connection-triggered auto-load (openhab-ios#1336) can be diagnosed from device logs.
+    static let notificationNavigation = Logger(subsystem: subsystem, category: "NotificationNavigation")
+
     static let nwPathMonitoring = Logger(subsystem: subsystem, category: "NWPathMonitoring")
 
     static let openAPIService = Logger(subsystem: subsystem, category: "OpenAPIService")
@@ -55,6 +61,8 @@ public extension Logger {
     static let openHABImageProcessor = Logger(subsystem: subsystem, category: "OpenHABImageProcessor")
 
     static let pageLoader = Logger(subsystem: subsystem, category: "PageLoader")
+
+    static let sitemapPageLoader = Logger(subsystem: subsystem, category: "SitemapPageLoader")
 
     static let preferences = Logger(subsystem: subsystem, category: "Preferences")
 
@@ -82,6 +90,8 @@ public extension Logger {
 
     static let viewController = Logger(subsystem: subsystem, category: "viewController")
 
+    static let webViewLoad = Logger(subsystem: subsystem, category: "WebViewLoad")
+
     static let widgets = Logger(subsystem: subsystem, category: "Widgets")
 
     static let rtfTextView = Logger(subsystem: subsystem, category: "RTFTextView")
@@ -89,10 +99,4 @@ public extension Logger {
     static let watchService = Logger(subsystem: subsystem, category: "WatchService")
 
     static let watchInterface = Logger(subsystem: subsystem, category: "WatchInterface")
-
-    #if DEBUG
-    private static let testSubsystem = subsystem + "." + "test"
-
-    static let testNetworkTracker = Logger(subsystem: testSubsystem, category: "NetworkTrackerTests")
-    #endif
 }

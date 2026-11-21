@@ -12,7 +12,6 @@
 import OpenHABCore
 import Testing
 
-@Suite
 struct WidgetDisplayStateTests {
     @Test
     func usesItemStateWhenWidgetStateIsEmpty() {
@@ -81,7 +80,7 @@ struct WidgetDisplayStateTests {
             category: nil,
             options: nil
         )
-        let widget = OpenHABWidget(
+        return OpenHABWidget(
             widgetId: "widget-id",
             label: label,
             icon: "switch",
@@ -112,6 +111,5 @@ struct WidgetDisplayStateTests {
             forceAsItem: nil,
             labelSource: .sitemapDefinition
         )
-        return widget
     }
 }

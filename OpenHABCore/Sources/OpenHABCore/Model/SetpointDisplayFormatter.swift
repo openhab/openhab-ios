@@ -12,8 +12,8 @@
 import Foundation
 
 public enum SetpointDisplayFormatter {
-    // Use a stable dot-decimal locale for platforms that intentionally avoid
-    // locale-aware formatting until all number controls are migrated together.
+    /// Use a stable dot-decimal locale for platforms that intentionally avoid
+    /// locale-aware formatting until all number controls are migrated together.
     public static let dotDecimalLocale = Locale(identifier: "en_US_POSIX")
 
     // swiftlint:disable:next function_parameter_count

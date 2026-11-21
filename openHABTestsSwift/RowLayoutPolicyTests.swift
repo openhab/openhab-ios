@@ -14,7 +14,6 @@ import OpenHABCore
 import SwiftUI
 import Testing
 
-@Suite
 struct RowLayoutPolicyTests {
     @Test
     func linkedFrameUsesFrameInsetsAndBackground() {
@@ -42,9 +41,77 @@ struct RowLayoutPolicyTests {
         #expect(RowLayoutPolicy.rowInsets(for: input) == RowLayoutPolicy.regularInsets)
         #expect(RowLayoutPolicy.backgroundKind(for: input) == .regular)
     }
+
+    @Test
+    func sitemapGridUsesTwoColumnsOnAnyRegularWidth() {
+        #expect(SitemapPresentationPolicy.columnCount(for: 300, horizontalSizeClass: .regular) == 2)
+        #expect(SitemapPresentationPolicy.columnCount(for: 668, horizontalSizeClass: .regular) == 2)
+        #expect(SitemapPresentationPolicy.columnCount(for: 1400, horizontalSizeClass: .compact) == 1)
+    }
+
+    @Test
+    func sitemapGridCapsColumnCount() {
+        #expect(SitemapPresentationPolicy.columnCount(for: 1067, horizontalSizeClass: .regular) == 2)
+        #expect(SitemapPresentationPolicy.columnCount(for: 1068, horizontalSizeClass: .regular) == 3)
+        #expect(SitemapPresentationPolicy.columnCount(for: 1400, horizontalSizeClass: .regular) == 3)
+    }
+
+    @Test
+    func regularGridRowsUseConsistentHeight() {
+        let widget = makeLinkedWidget(widgetID: "text-linked", type: .text, label: "Linked Text")
+        let input = mappedRowInput(widget)
+
+        #expect(SitemapPresentationPolicy.cellHeight(for: input) == SitemapPresentationPolicy.regularGridCellHeight)
+    }
+
+    @Test
+    func buttonGridChartAndVideoRowsUseNaturalGridHeight() {
+        let buttonGridInput = mappedRowInput(makeWidget(widgetID: "buttonGrid", type: .buttongrid, label: "Buttons"))
+        let chartInput = mappedRowInput(makeWidget(widgetID: "chart", type: .chart, label: "Chart"))
+        let videoInput = mappedRowInput(makeWidget(widgetID: "video", type: .video, label: "Video"))
+
+        #expect(SitemapPresentationPolicy.cellHeight(for: buttonGridInput) == nil)
+        #expect(SitemapPresentationPolicy.cellHeight(for: chartInput) == nil)
+        #expect(SitemapPresentationPolicy.cellHeight(for: videoInput) == nil)
+    }
+
+    @Test
+    func buttonGridChartAndVideoRowsUseFullGridWidth() {
+        let buttonGridInput = mappedRowInput(makeWidget(widgetID: "buttonGrid", type: .buttongrid, label: "Buttons"))
+        let chartInput = mappedRowInput(makeWidget(widgetID: "chart", type: .chart, label: "Chart"))
+        let videoInput = mappedRowInput(makeWidget(widgetID: "video", type: .video, label: "Video"))
+        let regularInput = mappedRowInput(makeLinkedWidget(widgetID: "text-linked", type: .text, label: "Linked Text"))
+
+        #expect(SitemapPresentationPolicy.usesFullWidthCell(for: buttonGridInput))
+        #expect(SitemapPresentationPolicy.usesFullWidthCell(for: chartInput))
+        #expect(SitemapPresentationPolicy.usesFullWidthCell(for: videoInput))
+        #expect(!SitemapPresentationPolicy.usesFullWidthCell(for: regularInput))
+    }
 }
 
 private extension RowLayoutPolicyTests {
+    func makeWidget(widgetID: String, type: OpenHABWidget.WidgetType, label: String) -> OpenHABWidget {
+        OpenHABWidget(
+            widgetId: widgetID,
+            label: label,
+            icon: "text",
+            type: type,
+            url: nil, period: nil, minValue: nil, maxValue: nil, step: nil,
+            refresh: nil, height: nil, isLeaf: nil, iconColor: nil,
+            labelColor: nil, valueColor: nil, service: nil, state: nil,
+            text: nil, legend: nil, inputHint: nil, encoding: nil,
+            item: nil,
+            linkedPage: nil,
+            mappings: [],
+            widgets: [],
+            visibility: true,
+            switchSupport: nil,
+            forceAsItem: nil,
+            labelSource: .sitemapDefinition,
+            releaseOnly: nil
+        )
+    }
+
     func makeLinkedWidget(widgetID: String, type: OpenHABWidget.WidgetType, label: String) -> OpenHABWidget {
         OpenHABWidget(
             widgetId: widgetID,

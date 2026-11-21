@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import Foundation
 import OpenHABCore
 import os.log
@@ -46,7 +45,6 @@ actor NotificationServiceHandler {
     static let networkTimeout: TimeInterval = 20 // don't go too long or we risk being terminated by the system
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
-    var cancellables = Set<AnyCancellable>()
     var networkTracker: NetworkTracker?
     var cloudUserId: String?
     private var notificationCategoryRegistrationTask: Task<Void, Never>?
@@ -155,7 +153,7 @@ actor NotificationServiceHandler {
         return (localURL, urlResponse.mimeType)
     }
 
-    // Helper function to determine full URL
+    /// Helper function to determine full URL
     private func resolveFullURL(from url: String, baseURL: String) -> URL? {
         if let parsedURL = URL(string: url), parsedURL.scheme != nil {
             return parsedURL
@@ -318,8 +316,7 @@ actor NotificationServiceHandler {
         if let tracker = networkTracker {
             return tracker
         }
-        // Ensure Preferences initializes on the MainActor to avoid crashes
-        await MainActor.run { _ = Preferences.shared }
+        await Preferences.prepareForAppExtensionAccess()
 
         let tracker = NetworkTracker(timeout: NotificationServiceHandler.networkTimeout)
         let connections: [ConnectionConfiguration]
@@ -327,12 +324,13 @@ actor NotificationServiceHandler {
         if let cloudUserId,
            let instance = await Preferences.shared.storedHome(forCloudUserId: cloudUserId) {
             Logger.notificationService.info("Setting up network tracking for \(cloudUserId)")
-            connections = await [instance.localConnectionConfig, instance.remoteConnectionConfig]
+            connections = [instance.localConnectionConfig, instance.remoteConnectionConfig]
         } else {
             Logger.notificationService.info("Using default connection configurations")
-            connections = await [
-                Preferences.shared.currentHomePreferences.localConnectionConfig,
-                Preferences.shared.currentHomePreferences.remoteConnectionConfig
+            let currentHomePreferences = await Preferences.shared.currentHomePreferences
+            connections = [
+                currentHomePreferences.localConnectionConfig,
+                currentHomePreferences.remoteConnectionConfig
             ]
         }
 

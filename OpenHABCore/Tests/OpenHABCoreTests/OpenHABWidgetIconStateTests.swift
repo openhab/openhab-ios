@@ -13,7 +13,6 @@ import OpenHABCore
 import SwiftUI
 import Testing
 
-@Suite
 struct OpenHABWidgetIconStateTests {
 //    @Test
 //    func returnsLowercasedState() {

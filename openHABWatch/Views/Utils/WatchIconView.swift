@@ -13,7 +13,7 @@ import CommonUI
 import Kingfisher
 import OpenHABCore
 import os.log
-import SFSafeSymbols
+internal import SFSafeSymbols
 import SwiftUI
 
 struct IconRenderModel: Equatable {
@@ -27,8 +27,8 @@ struct IconRenderModel: Equatable {
 
 struct WatchIconView: View {
     let model: IconRenderModel
-    @ObservedObject var settings = AppSettings.shared
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var settings: AppSettings = .shared
+    var networkTracker = MainActorNetworkTracker.shared
     @State private var lastResolvedIconURL: URL?
     @State private var lastResolvedConnection: ConnectionInfo?
     @State private var keepLastResolvedIconURLUntil: Date = .distantPast
@@ -50,17 +50,21 @@ struct WatchIconView: View {
         )?.url
     }
 
-    // During a transient connection handover activeConnection can briefly be nil.
-    // Hold the last successfully resolved URL and connection for a short grace period
-    // so icons don't flash blank between reconnects, and retained auth carries over.
+    /// During a transient connection handover activeConnection can briefly be nil.
+    /// Hold the last successfully resolved URL and connection for a short grace period
+    /// so icons don't flash blank between reconnects, and retained auth carries over.
     private var displayIconURL: URL? {
-        if let url = iconURL { return url }
+        if let url = iconURL {
+            return url
+        }
         guard Date() <= keepLastResolvedIconURLUntil else { return nil }
         return lastResolvedIconURL
     }
 
     private var displayConnection: ConnectionInfo? {
-        if let connection = networkTracker.activeConnection { return connection }
+        if let connection = networkTracker.activeConnection {
+            return connection
+        }
         guard Date() <= keepLastResolvedIconURLUntil else { return nil }
         return lastResolvedConnection
     }
@@ -84,13 +88,13 @@ struct WatchIconView: View {
                     .cacheOriginalImage(false)
                     .loadTransition(.opacity, animation: .easeInOut(duration: 0.25))
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: 20, height: 20)
                     .id("\(iconURL.absoluteString)-\(model.stateToken)-\(model.iconColorHex)")
             } else if let fallbackSymbol = model.fallbackSymbol {
                 Image(systemSymbol: fallbackSymbol)
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: 15, height: 15)
                     .foregroundStyle(.primary)
             } else {

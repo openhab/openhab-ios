@@ -69,6 +69,12 @@ extension SitemapPageViewModel {
         }
 
         if let openAPIError = error as? OpenAPIServiceError {
+            guard !Task.isCancelled else {
+                logger.info("Task cancelled, ignoring OpenAPIServiceError: \(openAPIError.localizedDescription, privacy: .public)")
+                isLoading = false
+                isUpdating = false
+                return
+            }
             logger.error("OpenAPIServiceError: \(openAPIError.localizedDescription)")
             isLoading = false
             isUpdating = false

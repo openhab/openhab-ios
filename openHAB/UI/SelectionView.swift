@@ -56,11 +56,8 @@ struct SelectionView: View {
             OpenHABWidgetMapping(command: "command2", label: "Option 2")
         ],
         selectionItemState: "command2"
-    ) { selectedMappingIndex in
-        print("Selected mapping at index \(selectedMappingIndex)")
-    } onDismiss: {
-        print("Dismissing selection view")
-    }
+    ) { _ in
+    } onDismiss: {}
 }
 
 #Preview("With Valuecolor") {
@@ -72,9 +69,6 @@ struct SelectionView: View {
         ],
         selectionItemState: "OFF",
         valuecolor: "red"
-    ) { selectedMappingIndex in
-        print("Selected mapping at index \(selectedMappingIndex)")
-    } onDismiss: {
-        print("Dismissing selection view")
-    }
+    ) { _ in
+    } onDismiss: {}
 }

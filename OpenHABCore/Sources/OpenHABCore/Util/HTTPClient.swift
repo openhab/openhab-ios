@@ -248,7 +248,7 @@ public final class HTTPClient: NSObject, Sendable {
         case mjpegStream
     }
 
-    // this can be changed if we detect another server
+    /// this can be changed if we detect another server
     public let baseURL: URL?
 
     private let connectionConfiguration: ConnectionConfiguration
@@ -327,7 +327,7 @@ public final class HTTPClient: NSObject, Sendable {
         return data
     }
 
-    public func notification(urlString: String) async throws -> [OpenHABNotification] {
+    public func notifications(urlString: String) async throws -> [OpenHABNotification] {
         guard let url = Endpoint.notification(prefsURL: urlString).url else { throw HTTPClientError.couldNotLoadNotification }
         let data = try await notification(url: url)
 
@@ -336,7 +336,7 @@ public final class HTTPClient: NSObject, Sendable {
         return codingDatas.map(\.openHABNotification)
     }
 
-    /**
+    /*
       Initiates a download request to a specified base URL for a specified path and returns the file URL via a completion handler.
 
       - Parameters:

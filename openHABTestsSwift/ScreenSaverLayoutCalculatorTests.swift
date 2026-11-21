@@ -13,7 +13,6 @@ import CoreGraphics
 @testable import openHAB
 import Testing
 
-@Suite
 struct ScreenSaverLayoutCalculatorTests {
     @Test
     func oversizedTimeTextScalesDownToFitHorizontalMargins() {

@@ -1,0 +1,426 @@
+// Copyright (c) 2010-2026 Contributors to the openHAB project
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
+//
+// SPDX-License-Identifier: EPL-2.0
+
+import OpenHABCore
+import SFSafeSymbols
+import SwiftUI
+
+// MARK: - Connection symbol model
+
+/// Symbols shown in each home row to communicate configured connection types.
+/// Derived purely from stored preferences — no live connection state.
+enum HomeConnectionSymbol: Hashable {
+    /// Local server URL is configured.
+    case wifi
+    /// Cloud/remote connection configured with credentials.
+    case cloudFill
+    /// Cloud/remote connection configured but credentials are missing.
+    case cloudSlash
+}
+
+// MARK: - Home picker action bar
+
+/// What the home picker's action bar offers.
+enum HomePickerAction: Equatable {
+    /// Edit mode: "Add Home" above "Done".
+    case editing
+    /// Zero or one home: a single home can be neither reordered nor deleted, so "Edit" would only
+    /// reveal "Add Home". Offer it right away, also while the homes are still loading.
+    case addHome
+    /// Several homes: "Edit" leads to adding, deleting and reordering.
+    case edit
+
+    init(homeCount: Int, isEditing: Bool) {
+        guard !isEditing else {
+            self = .editing
+            return
+        }
+        self = homeCount <= 1 ? .addHome : .edit
+    }
+}
+
+// MARK: - Inline home picker
+
+struct InlineHomePickerView: View {
+    /// Shared row height keeps normal and edit mode visually identical.
+    private static let rowHeight: CGFloat = 44
+
+    @Binding var isMenuPresented: Bool
+
+    @State private var homes: [UUID] = []
+    @State private var cachedActiveHomeId: UUID?
+    @State private var cachedHomesWithCreds: [UUID: HomePreferences] = [:]
+
+    @State private var showEditMode = false
+    @State private var homeForSettings: UUID?
+
+    @State private var homeForDeleteAlert = UUID()
+    @State private var homeNameForDeleteAlert = ""
+    @State private var newHomeName = ""
+    @State private var showingDeleteAlert = false
+    @State private var showingNewHomeAlert = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if showEditMode {
+                editModeList
+                    .transition(.opacity)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(homes, id: \.self) { home in
+                        homeRow(for: home)
+                            .transition(.opacity)
+                    }
+                }
+                .transition(.opacity)
+            }
+            Divider().padding(.horizontal, 12)
+            actionBar
+                // `reloadHomes()` sets `homes` outside `withAnimation`; animate the switch
+                // between "Add Home" and "Edit" when the home count crosses one.
+                .animation(.easeInOut(duration: 0.25), value: action)
+        }
+        .task { await reloadHomes() }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("org.openhab.preferences.saved"))) { _ in
+            Task { await reloadHomes() }
+        }
+        .alert(
+            String(localized: "Delete '\(homeNameForDeleteAlert)'?"),
+            isPresented: $showingDeleteAlert
+        ) {
+            Button(String(localized: "Cancel"), role: .cancel) {}
+            Button(String(localized: "Delete"), role: .destructive) {
+                let idToDelete = homeForDeleteAlert
+                Task { @MainActor in
+                    await Preferences.shared.deleteStoredHome(idToDelete)
+                    await reloadHomes()
+                }
+            }
+        }
+        .alert(String(localized: "New Home"), isPresented: $showingNewHomeAlert) {
+            TextField(String(localized: "Home name"), text: $newHomeName)
+            Button(String(localized: "Cancel"), role: .cancel) {}
+            Button(String(localized: "Create")) {
+                let name = newHomeName
+                Task { @MainActor in
+                    await Preferences.shared.createAndLoadNewStoredSettings(homeName: name)
+                    await reloadHomes()
+                    homeForSettings = await (Preferences.shared.currentHomePreferences).id
+                    withAnimation(.easeInOut(duration: 0.25)) { showEditMode = false }
+                }
+            }
+        } message: {
+            Text("For Shortcuts to work across multiple devices, each home must have the same name on every device.")
+        }
+        .sheet(
+            isPresented: Binding(
+                get: { homeForSettings != nil },
+                set: {
+                    if !$0 {
+                        homeForSettings = nil
+                    }
+                }
+            )
+        ) {
+            if let target = homeForSettings {
+                NavigationStack {
+                    HomeSettingsView(homeId: target)
+                }
+            }
+        }
+    }
+
+    // MARK: - Edit-mode list (drag-to-reorder)
+
+    private var editModeList: some View {
+        List {
+            ForEach(homes, id: \.self) { home in
+                editModeRow(for: home)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .moveDisabled(homes.count < 2)
+            }
+            .onMove { source, destination in
+                homes.move(fromOffsets: source, toOffset: destination)
+                let reordered = homes
+                Task {
+                    await Preferences.shared.updateHomeOrder(reordered)
+                }
+            }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .scrollDisabled(true)
+        .environment(\.editMode, .constant(.active))
+        // List enforces a defaultMinListRowHeight independently of listRowInsets and
+        // frame(height:) on row content. Override it so the List doesn't inflate rows
+        // beyond our target height.
+        .environment(\.defaultMinListRowHeight, Self.rowHeight)
+        // List with scrollDisabled doesn't auto-shrink; fix the height so
+        // the parent ScrollView remains in control of total menu scrolling.
+        // .clipped() prevents the List from reporting a taller preferred size
+        // than the frame to the parent VStack.
+        .frame(height: CGFloat(homes.count) * Self.rowHeight)
+        .clipped()
+    }
+
+    // MARK: - Action bar
+
+    private var addHomeButton: some View {
+        Button(
+            action: { newHomeName = ""; showingNewHomeAlert = true },
+            label: {
+                HStack(spacing: 4) {
+                    Image(systemSymbol: .plus)
+                    Text("Add Home")
+                }
+                .font(.footnote)
+                .foregroundStyle(.blue)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 13)
+            }
+        )
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("AddHomeButton")
+    }
+
+    private var action: HomePickerAction {
+        HomePickerAction(homeCount: homes.count, isEditing: showEditMode)
+    }
+
+    @ViewBuilder
+    private var actionBar: some View {
+        switch action {
+        case .editing:
+            VStack(spacing: 0) {
+                addHomeButton
+
+                Divider()
+
+                Button(
+                    action: { withAnimation(.easeInOut(duration: 0.25)) { showEditMode = false } },
+                    label: {
+                        Text("Done")
+                            .font(.footnote)
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 13)
+                    }
+                )
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 16)
+        case .addHome:
+            addHomeButton
+                .padding(.horizontal, 16)
+        case .edit:
+            Button(
+                action: { withAnimation(.easeInOut(duration: 0.25)) { showEditMode = true } },
+                label: {
+                    Text("Edit")
+                        .font(.footnote)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                }
+            )
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("EditHomesButton")
+            .padding(.horizontal, 16)
+        }
+    }
+
+    /// Maps a home's stored configuration to an ordered list of display symbols.
+    ///
+    /// This is a pure static function so it can be exercised by unit tests
+    /// without constructing a view.
+    static func connectionSymbols(for prefs: HomePreferences) -> [HomeConnectionSymbol] {
+        guard !prefs.demomode else { return [] }
+        var result: [HomeConnectionSymbol] = []
+        if !prefs.localConnectionConfig.url.isEmpty {
+            result.append(.wifi)
+        }
+        // `supportsNotifications` is the "openHAB Cloud Service" toggle.
+        // When it is off the user has explicitly disabled cloud; show no symbol.
+        let remote = prefs.remoteConnectionConfig
+        if remote.supportsNotifications, !prefs.disableRemoteConnection {
+            // All three must be present: a server URL, a username, and a password.
+            // username and password come from the Keychain (injected by
+            // storedHomeWithCredentials); either being empty means the connection
+            // will fail authentication even if the URL is correct.
+            let isValid = !remote.url.isEmpty && !remote.username.isEmpty && !remote.password.isEmpty
+            result.append(isValid ? .cloudFill : .cloudSlash)
+        }
+        return result
+    }
+
+    // MARK: - Data loading
+
+    private func reloadHomes() async {
+        homes = await Preferences.shared.listStoredHomes()
+        cachedActiveHomeId = await (Preferences.shared.currentHomePreferences).id
+        let rawHomes = await Preferences.shared.storedHomes
+        var creds: [UUID: HomePreferences] = [:]
+        for id in rawHomes.keys {
+            if let p = await Preferences.shared.storedHomeWithCredentials(forId: id) {
+                creds[id] = p
+            }
+        }
+        cachedHomesWithCreds = creds
+    }
+
+    // MARK: - Normal-mode home row
+
+    @ViewBuilder
+    private func homeRow(for home: UUID) -> some View {
+        let homeName = cachedHomesWithCreds[home]?.homeName ?? ""
+        let isActive = cachedActiveHomeId == home
+        let prefs = cachedHomesWithCreds[home]
+
+        HStack(spacing: 8) {
+            avatarView(for: home, isActive: isActive)
+
+            Text(homeName)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .lineLimit(2)
+
+            Spacer(minLength: 4)
+
+            if let prefs {
+                connectionSymbolsView(for: prefs)
+            }
+
+            // Gear opens Home Settings without triggering a home switch.
+            Button(
+                action: { homeForSettings = home },
+                label: {
+                    Image(systemSymbol: .gear)
+                        .foregroundStyle(.secondary)
+                }
+            )
+            .buttonStyle(.plain)
+        }
+        .frame(height: Self.rowHeight)
+        .padding(.horizontal, 16)
+        .contentShape(Rectangle())
+        .onTapGesture { selectHome(home) }
+    }
+
+    @ViewBuilder
+    private func editModeRow(for home: UUID) -> some View {
+        let homeName = cachedHomesWithCreds[home]?.homeName ?? ""
+        let isActive = cachedActiveHomeId == home
+        let prefs = cachedHomesWithCreds[home]
+
+        HStack(spacing: 8) {
+            avatarView(for: home, isActive: isActive)
+
+            Text(homeName)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .lineLimit(2)
+
+            Spacer(minLength: 4)
+
+            if let prefs {
+                connectionSymbolsView(for: prefs)
+            }
+
+            if homes.count >= 2 {
+                Button(
+                    action: {
+                        homeNameForDeleteAlert = homeName
+                        homeForDeleteAlert = home
+                        showingDeleteAlert = true
+                    },
+                    label: {
+                        Image(systemSymbol: .trash)
+                            .foregroundStyle(isActive ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.red))
+                    }
+                )
+                .buttonStyle(.plain)
+                .disabled(isActive)
+            }
+        }
+        .frame(height: Self.rowHeight)
+        .padding(.horizontal, 16)
+        .contentShape(Rectangle())
+    }
+
+    // MARK: - Avatar
+
+    /// Always renders a 28 × 28 avatar circle. Uses the home's custom image when
+    /// available, falling back to the home's configured icon and color. A blue ring
+    /// when `isActive` replaces the separate checkmark, keeping row widths consistent.
+    @ViewBuilder
+    private func avatarView(for homeId: UUID, isActive: Bool) -> some View {
+        let prefs = cachedHomesWithCreds[homeId]
+        let mode = prefs?.avatarMode
+        HomeAvatarView(
+            photo: AvatarImageHelper.renderedAvatar(for: homeId, mode: mode),
+            icon: mode?.icon ?? HomeAvatarView.defaultIcon,
+            color: Color(hex: mode?.colorHex ?? "") ?? HomeAvatarView.defaultColor,
+            size: 28,
+            isActive: isActive
+        )
+    }
+
+    // MARK: - Connection symbols
+
+    @ViewBuilder
+    private func connectionSymbolsView(for prefs: HomePreferences) -> some View {
+        if prefs.demomode {
+            Text("Demo")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        } else {
+            // Two fixed-width slots so the gear button never shifts position:
+            //   Slot 1 — wifi (always reserved, invisible when URL is empty)
+            //   Slot 2 — cloud (always reserved, invisible when remote is disabled)
+            let symbols = Self.connectionSymbols(for: prefs)
+            let hasWifi = symbols.contains(.wifi)
+            let cloudSymbol = symbols.first { $0 == .cloudFill || $0 == .cloudSlash }
+            let hasCloud = cloudSymbol != nil
+            HStack(spacing: 4) {
+                symbolImage(for: .wifi)
+                    .opacity(hasWifi ? 1 : 0)
+                symbolImage(for: cloudSymbol ?? .cloudFill)
+                    .opacity(hasCloud ? 1 : 0)
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private func symbolImage(for symbol: HomeConnectionSymbol) -> some View {
+        switch symbol {
+        case .wifi:
+            Image(systemSymbol: .wifi)
+        case .cloudFill:
+            Image(systemSymbol: .cloudFill)
+        case .cloudSlash:
+            // Outline variant keeps the exclamation mark visible against light/grey backgrounds.
+            Image(systemSymbol: .exclamationmarkIcloud)
+        }
+    }
+
+    // MARK: - Home selection
+
+    private func selectHome(_ home: UUID) {
+        Task { @MainActor in
+            await Preferences.shared.switchActiveHome(to: home)
+            NotificationCenter.default.post(name: .homeDidSwitch, object: nil)
+            isMenuPresented = false
+        }
+    }
+}

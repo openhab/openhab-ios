@@ -12,7 +12,6 @@
 import OpenHABCore
 import Testing
 
-@Suite
 struct WidgetRenderingKindTests {
     @Test
     func switchWithMappingsUsesSegmentedKind() {

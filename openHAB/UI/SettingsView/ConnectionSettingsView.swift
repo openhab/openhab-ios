@@ -17,52 +17,52 @@ struct ConnectionSettingsView: View {
     @Binding var settingsDemomode: Bool
     @Binding var localConnectionConfiguration: ConnectionConfiguration
     @Binding var remoteConnectionConfiguration: ConnectionConfiguration
+    @Binding var localTestedOKURL: String
+    @Binding var disableRemoteConnection: Bool
+
+    @State private var remoteTestedOKURL = ""
 
     var body: some View {
         Toggle("Demo Mode", isOn: $settingsDemomode)
             .accessibilityIdentifier("Demo Mode")
 
         if !settingsDemomode {
-            Group {
-                SingleConnectionSettingsView(headerText: String(localized: "Local server"), isLocalConnection: true, connectionConfig: $localConnectionConfiguration, showNotificationToggle: false)
-                SingleConnectionSettingsView(headerText: String(localized: "Remote server"), connectionConfig: $remoteConnectionConfiguration, showNotificationToggle: true)
-            }
+            SingleConnectionSettingsView(headerText: String(localized: "Local server"), isLocalConnection: true, connectionConfig: $localConnectionConfiguration, showNotificationToggle: false, testedOKURL: $localTestedOKURL)
+
+            SingleConnectionSettingsView(
+                headerText: String(localized: "Remote server"),
+                isEnabled: Binding(get: { !disableRemoteConnection }, set: { disableRemoteConnection = !$0 }),
+                connectionConfig: $remoteConnectionConfiguration,
+                showNotificationToggle: true,
+                testedOKURL: $remoteTestedOKURL
+            )
         }
     }
 }
 
-// **TODO Migrate to @Previewable on iOS 17
 #Preview {
-    struct PreviewWrapper: View {
-        @State var demoMode = false
-        @State var localUrl = "https://openhab.local:8443"
-        @State var remoteUrl = "https://myopenhab.org"
-        @State var username = "user"
-        @State var password = "password123"
-        @State var alwaysSendCreds = true
+    @Previewable @State var demoMode = false
+    @Previewable @State var disableRemote = false
+    @Previewable @State var connectionConfig1 = ConnectionConfiguration(
+        url: "https://openhab.local:8443",
+        username: "user",
+        password: "password123"
+    )
+    @Previewable @State var connectionConfig2 = ConnectionConfiguration(
+        url: "http://192.168.2.1",
+        username: "user",
+        password: "password123"
+    )
 
-        @State var connectionConfig1 = ConnectionConfiguration(
-            url: "https://openhab.local:8443",
-            username: "user",
-            password: "password123"
-        )
-        @State var connectionConfig2 = ConnectionConfiguration(
-            url: "http://192.168.2.1",
-            username: "user",
-            password: "password123"
-        )
-
-        var body: some View {
-            NavigationStack {
-                Form {
-                    ConnectionSettingsView(
-                        settingsDemomode: $demoMode,
-                        localConnectionConfiguration: $connectionConfig1,
-                        remoteConnectionConfiguration: $connectionConfig2
-                    )
-                }
-            }
+    NavigationStack {
+        Form {
+            ConnectionSettingsView(
+                settingsDemomode: $demoMode,
+                localConnectionConfiguration: $connectionConfig1,
+                remoteConnectionConfiguration: $connectionConfig2,
+                localTestedOKURL: .constant(""),
+                disableRemoteConnection: $disableRemote
+            )
         }
     }
-    return PreviewWrapper()
 }

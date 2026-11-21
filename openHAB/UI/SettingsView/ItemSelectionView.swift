@@ -27,7 +27,9 @@ struct ItemSelectionView: View {
     @State private var isLoading = true
 
     private var filteredItems: [OpenHABItem] {
-        if searchText.isEmpty { return items }
+        if searchText.isEmpty {
+            return items
+        }
         return items.filter { item in
             (item.label.localizedCaseInsensitiveContains(searchText)) ||
                 item.name.localizedCaseInsensitiveContains(searchText)
@@ -75,7 +77,6 @@ struct ItemSelectionView: View {
         }
     }
 
-    @ViewBuilder
     private func itemRow(_ item: OpenHABItem) -> some View {
         Button {
             selectedItemName = (selectedItemName == item.name) ? nil : item.name

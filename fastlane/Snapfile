@@ -6,10 +6,10 @@ devices([
     "iPad Pro 13-inch (M5)"     # 13-inch — required
 ])
 
-#languages([
-#    "en-US",
-#    "de-DE"
-#])
+languages([
+    "en-US",
+    "de-DE"
+])
 
 launch_arguments([
   "-demomode true -iconType 0"

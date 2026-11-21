@@ -54,7 +54,9 @@ public struct TestClientTransport: ClientTransport {
     /// Initializes a `TestClientTransport` instance with a custom call handler.
     ///
     /// - Parameter callHandler: The closure responsible for processing client requests.
-    public init(callHandler: @escaping CallHandler) { self.callHandler = callHandler }
+    public init(callHandler: @escaping CallHandler) {
+        self.callHandler = callHandler
+    }
 
     /// Sends a client request using the test transport.
     ///
@@ -67,5 +69,7 @@ public struct TestClientTransport: ClientTransport {
     /// - Throws: An error if the call handler encounters an issue.
     public func send(_ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String) async throws -> (
         HTTPResponse, HTTPBody?
-    ) { try await callHandler(request, body, baseURL, operationID) }
+    ) {
+        try await callHandler(request, body, baseURL, operationID)
+    }
 }

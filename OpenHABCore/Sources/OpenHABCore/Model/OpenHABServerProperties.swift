@@ -19,9 +19,10 @@ public struct OpenHABServerProperties: Decodable, Sendable {
         linkUrl(byType: "habpanel")
     }
 
-    init(version: String?, links: [OpenHABLink]) {
-        self.version = version
-        self.links = links
+    /// The REST endpoints this server offers, e.g. "items", "rules", "auth". The root resource
+    /// lists each as a link of that type.
+    public var linkTypes: Set<String> {
+        Set(links.compactMap(\.type))
     }
 
     public func linkUrl(byType type: String?) -> String? {
@@ -39,5 +40,18 @@ extension OpenHABServerProperties {
             version: rootBean.version,
             links: rootBean.links?.compactMap { OpenHABLink($0) } ?? []
         )
+    }
+}
+
+public extension OpenHABServerProperties {
+    var majorVersion: Int? {
+        guard let version else { return nil }
+        let trimmed = version.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = trimmed.split(separator: ".")
+        return Int(parts.first ?? "")
+    }
+
+    func hasSseSupport() -> Bool {
+        SitemapUpdatePolicy.usesEvents(serverVersion: majorVersion)
     }
 }

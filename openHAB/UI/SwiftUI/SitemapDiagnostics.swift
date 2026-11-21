@@ -116,11 +116,199 @@ actor IconLoadDiagnostics {
 }
 
 @MainActor
+struct SitemapInitialLoadMeasurement {
+    private let pipelineStartedAt: Date
+    private let context: String
+    private let processAgeMs: Int
+    private let connectionWasReady: Bool
+    private var stage = "sitemapDiscovery"
+    private var stageStartedAt: Date
+    private var connection: ConnectionConfiguration?
+    private var discoveryMs = 0
+    private var connectionWaitMs = 0
+    private var serviceSetupMs = 0
+    private var labelFetchMs = 0
+    private var initialRequestStartedAt: Date?
+    private var initialRequestMs = 0
+    private var uiPreparationMs = 0
+    private var didLog = false
+
+    private var currentInitialRequestMs: Int {
+        initialRequestStartedAt.map { elapsedMs(since: $0) } ?? initialRequestMs
+    }
+
+    init(reason: String,
+         isLinkedPage: Bool,
+         hasCurrentPage: Bool,
+         connectionWasReady: Bool,
+         pipelineStartedAt: Date) {
+        context = SitemapDiagnostics.initialLoadContext(
+            reason: reason,
+            isLinkedPage: isLinkedPage,
+            hasCurrentPage: hasCurrentPage
+        )
+        processAgeMs = SitemapDiagnostics.processAgeMs
+        self.connectionWasReady = connectionWasReady
+        self.pipelineStartedAt = pipelineStartedAt
+        stageStartedAt = pipelineStartedAt
+    }
+
+    mutating func beginConnectionSelection() {
+        transition(to: "connectionSelection")
+    }
+
+    mutating func beginServiceSetup(connection: ConnectionConfiguration) {
+        self.connection = connection
+        transition(to: "serviceSetup")
+    }
+
+    mutating func beginLabelFetch() {
+        transition(to: "sitemapLabel")
+    }
+
+    mutating func beginInitialRequest() {
+        transition(to: "initialRequest")
+        initialRequestStartedAt = stageStartedAt
+    }
+
+    mutating func beginUIPreparation() {
+        transition(to: "uiPreparation")
+    }
+
+    mutating func log(status: String,
+                      page: OpenHABPage?,
+                      rowCount: Int,
+                      errorDescription: String = "") {
+        // The stream can later be cancelled after its initial fetch already logged success.
+        guard !didLog else { return }
+        didLog = true
+        finishCurrentStage()
+        SitemapDiagnostics.logInitialLoad(
+            context: context,
+            status: status,
+            stage: status == "success" || status == "empty" ? "complete" : stage,
+            processAgeMs: processAgeMs,
+            connectionWasReady: connectionWasReady,
+            connection: connection,
+            discoveryMs: discoveryMs,
+            connectionWaitMs: connectionWaitMs,
+            serviceSetupMs: serviceSetupMs,
+            labelFetchMs: labelFetchMs,
+            initialRequestMs: currentInitialRequestMs,
+            uiPreparationMs: uiPreparationMs,
+            totalMs: elapsedMs(since: pipelineStartedAt),
+            widgetCount: page?.widgets.count ?? 0,
+            rowCount: rowCount,
+            errorDescription: errorDescription
+        )
+    }
+
+    private mutating func transition(to nextStage: String) {
+        finishCurrentStage()
+        stage = nextStage
+        stageStartedAt = Date()
+    }
+
+    private mutating func finishCurrentStage() {
+        let duration = elapsedMs(since: stageStartedAt)
+        switch stage {
+        case "sitemapDiscovery":
+            discoveryMs = duration
+        case "connectionSelection":
+            connectionWaitMs = duration
+        case "serviceSetup":
+            serviceSetupMs = duration
+        case "sitemapLabel":
+            labelFetchMs = duration
+        case "initialRequest":
+            initialRequestMs = duration
+            initialRequestStartedAt = nil
+        case "uiPreparation":
+            uiPreparationMs = duration
+        default:
+            break
+        }
+    }
+
+    private func elapsedMs(since start: Date) -> Int {
+        Int((Date().timeIntervalSince(start) * 1000).rounded())
+    }
+}
+
+@MainActor
 enum SitemapDiagnostics {
     private static let logger = Logger(subsystem: "org.openhab", category: "SitemapDiagnostics")
+    private static let processStartedAt = ProcessInfo.processInfo.systemUptime
 
     static var isEnabled: Bool {
-        Preferences.shared.applicationPreferences.sitemapDiagnosticsLogging
+        guard let data = UserDefaults(suiteName: "group.org.openhab.app")?.data(forKey: "applicationPreferences"),
+              let prefs = try? JSONDecoder().decode(ApplicationPreferences.self, from: data) else {
+            return false
+        }
+        return prefs.sitemapDiagnosticsLogging
+    }
+
+    static var processAgeMs: Int {
+        Int(((ProcessInfo.processInfo.systemUptime - processStartedAt) * 1000).rounded())
+    }
+
+    static func markProcessLaunch(source: String) {
+        guard isEnabled else { return }
+        logger.info("processLaunch source=\(source, privacy: .public)")
+    }
+
+    static func initialLoadContext(reason: String,
+                                   isLinkedPage: Bool,
+                                   hasCurrentPage: Bool) -> String {
+        if reason == "scene-became-active" {
+            return "foregroundResume"
+        }
+        if !isLinkedPage,
+           !hasCurrentPage,
+           reason == "manual" || reason == "connection-changed" {
+            return "coldStart"
+        }
+        if isLinkedPage {
+            return "linkedPage"
+        }
+        return reason
+    }
+
+    // swiftlint:disable:next function_parameter_count
+    static func logInitialLoad(context: String,
+                               status: String,
+                               stage: String,
+                               processAgeMs: Int,
+                               connectionWasReady: Bool,
+                               connection: ConnectionConfiguration?,
+                               discoveryMs: Int,
+                               connectionWaitMs: Int,
+                               serviceSetupMs: Int,
+                               labelFetchMs: Int,
+                               initialRequestMs: Int,
+                               uiPreparationMs: Int,
+                               totalMs: Int,
+                               widgetCount: Int,
+                               rowCount: Int,
+                               errorDescription: String = "") {
+        guard isEnabled else { return }
+        let connectionKind = connection.map(connectionKind(for:)) ?? "none"
+        let connectionDescription = connection?.publicLogDescription ?? "none"
+        // swiftlint:disable line_length
+        logger.info(
+            "initialLoad context=\(context, privacy: .public) status=\(status, privacy: .public) stage=\(stage, privacy: .public) processAgeMs=\(processAgeMs, privacy: .public) connectionWasReady=\(connectionWasReady, privacy: .public) connectionKind=\(connectionKind, privacy: .public) connection=\(connectionDescription, privacy: .public) discoveryMs=\(discoveryMs, privacy: .public) connectionWaitMs=\(connectionWaitMs, privacy: .public) serviceSetupMs=\(serviceSetupMs, privacy: .public) labelFetchMs=\(labelFetchMs, privacy: .public) initialRequestMs=\(initialRequestMs, privacy: .public) uiPreparationMs=\(uiPreparationMs, privacy: .public) totalMs=\(totalMs, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) error=\(errorDescription, privacy: .public)"
+        )
+        // swiftlint:enable line_length
+    }
+
+    static func connectionKind(for configuration: ConnectionConfiguration) -> String {
+        if configuration.isCloudConnection {
+            return "cloud"
+        }
+        if configuration.priority == 0 {
+            return "local"
+        }
+        return "remote"
     }
 
     // swiftlint:disable:next function_parameter_count
@@ -137,9 +325,8 @@ enum SitemapDiagnostics {
                           applyStateMs: Int,
                           totalUpdateMs: Int) {
         guard isEnabled else { return }
-        logger.info(
-            "update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) reusedInputs=\(reusedInputCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) buildRowInputsMs=\(buildRowInputsMs, privacy: .public) applyStateMs=\(applyStateMs, privacy: .public) analysisMs=\(analysisMs, privacy: .public) totalUpdateMs=\(totalUpdateMs, privacy: .public)"
-        )
+        // swiftlint:disable:next line_length
+        logger.info("update origin=\(origin.rawValue, privacy: .public) widgets=\(widgetCount, privacy: .public) rows=\(rowCount, privacy: .public) inputsChanged=\(inputsChanged, privacy: .public) titleChanged=\(titleChanged, privacy: .public) reusedInputs=\(reusedInputCount, privacy: .public) changedRows=\(changedRowCount, privacy: .public) changedKinds=\(changedRowKinds, privacy: .public) buildRowInputsMs=\(buildRowInputsMs, privacy: .public) applyStateMs=\(applyStateMs, privacy: .public) analysisMs=\(analysisMs, privacy: .public) totalUpdateMs=\(totalUpdateMs, privacy: .public)")
     }
 
     static func logLongPoll(requestMs: Int,
@@ -158,16 +345,17 @@ enum SitemapDiagnostics {
                                     replacedPendingPage: Bool,
                                     coalescedUpdates: Int) {
         guard isEnabled else { return }
+        // swiftlint:disable line_length
         logger.info(
             "longPollDebounce action=\(action, privacy: .public) elapsedMs=\(elapsedMs, privacy: .public) remainingMs=\(remainingMs, privacy: .public) replacedPendingPage=\(replacedPendingPage, privacy: .public) coalescedUpdates=\(coalescedUpdates, privacy: .public)"
         )
+        // swiftlint:enable line_length
     }
 
     static func logIconSummary(_ snapshot: IconLoadDiagnosticsSnapshot) {
         guard isEnabled, !snapshot.isEmpty else { return }
-        logger.info(
-            "icons resolutionFailures=\(snapshot.resolutionFailures, privacy: .public) starts=\(snapshot.starts, privacy: .public) successes=\(snapshot.successes, privacy: .public) memoryHits=\(snapshot.memoryHits, privacy: .public) diskHits=\(snapshot.diskHits, privacy: .public) networkLoads=\(snapshot.networkLoads, privacy: .public) cancellations=\(snapshot.cancellations, privacy: .public) failures=\(snapshot.failures, privacy: .public) distinctURLs=\(snapshot.distinctURLs, privacy: .public) distinctRows=\(snapshot.distinctRows, privacy: .public)"
-        )
+        // swiftlint:disable:next line_length
+        logger.info("icons resolutionFailures=\(snapshot.resolutionFailures, privacy: .public) starts=\(snapshot.starts, privacy: .public) successes=\(snapshot.successes, privacy: .public) memoryHits=\(snapshot.memoryHits, privacy: .public) diskHits=\(snapshot.diskHits, privacy: .public) networkLoads=\(snapshot.networkLoads, privacy: .public) cancellations=\(snapshot.cancellations, privacy: .public) failures=\(snapshot.failures, privacy: .public) distinctURLs=\(snapshot.distinctURLs, privacy: .public) distinctRows=\(snapshot.distinctRows, privacy: .public)")
     }
 
     static func logIconResolutionFailure(rowIdentity: String,
@@ -176,9 +364,11 @@ enum SitemapDiagnostics {
                                          trackerStatus: String,
                                          connectionDescription: String) {
         guard isEnabled else { return }
+        // swiftlint:disable line_length
         logger.info(
             "iconResolutionFailure row=\(rowIdentity, privacy: .private(mask: .hash)) icon=\(icon, privacy: .public) reason=\(reason, privacy: .public) trackerStatus=\(trackerStatus, privacy: .public) connection=\(connectionDescription, privacy: .public)"
         )
+        // swiftlint:enable line_length
     }
 
     static func logIconStart(rowIdentity: String, icon: String, url: URL, cacheKey: String) {

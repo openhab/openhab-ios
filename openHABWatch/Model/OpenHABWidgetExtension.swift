@@ -12,7 +12,7 @@
 import Foundation
 import OpenHABCore
 import os.log
-import SFSafeSymbols
+internal import SFSafeSymbols
 import SwiftUI
 import UIKit
 
@@ -35,8 +35,6 @@ extension OpenHABWidget {
         if linkedPage != nil {
             Image(systemSymbol: .chevronRight)
                 .foregroundStyle(.secondary)
-        } else {
-            EmptyView()
         }
     }
 }

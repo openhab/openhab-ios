@@ -10,18 +10,17 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
-
 @testable import OpenHABCore
-import XCTest
+import Testing
 
-final class ConnectionPoolTests: XCTestCase {
-    func testGetOrCreateServiceReturnsSameInstance() async throws {
+struct ConnectionPoolTests {
+    @Test func getOrCreateServiceReturnsSameInstance() async throws {
         let pool = ConnectionPool()
         let config = ConnectionConfiguration(url: "http://test", username: "", password: "", priority: 1)
 
         let service1 = try await pool.getOrCreateService(for: config)
         let service2 = try await pool.getOrCreateService(for: config)
 
-        XCTAssertTrue(service1 === service2)
+        #expect(service1 === service2)
     }
 }

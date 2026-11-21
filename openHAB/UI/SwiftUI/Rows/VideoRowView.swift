@@ -38,7 +38,6 @@ private struct VideoRowContent: View {
     @State private var aspectRatio: CGFloat = 16.0 / 9.0
     @State private var isLoading = false
     @State private var currentStreamUrl: URL?
-    @State private var imageObservationTimer: Timer?
     @State private var playerObserver: NSKeyValueObservation?
 
     private let logger = Logger(subsystem: "org.openhab", category: "VideoRowView")
@@ -65,28 +64,24 @@ private struct VideoRowContent: View {
             if let videoURL {
                 ZStack {
                     if isMJPEG {
-                        // MJPEG display using UIImageView
                         if let mjpegImage {
                             Image(uiImage: mjpegImage)
                                 .resizable()
                                 .aspectRatio(aspectRatio, contentMode: .fit)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 200)
                                 .clipShape(.rect(cornerRadius: 8))
                         } else {
                             Rectangle()
                                 .fill(Color.gray.opacity(0.3))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 200)
                                 .aspectRatio(aspectRatio, contentMode: .fit)
+                                .frame(maxWidth: .infinity)
                                 .clipShape(.rect(cornerRadius: 8))
                         }
                     } else {
                         // HLS/other video formats using VideoPlayer
                         VideoPlayer(player: player)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 200)
                             .aspectRatio(aspectRatio, contentMode: .fit)
+                            .frame(maxWidth: .infinity)
                             .clipShape(.rect(cornerRadius: 8))
                     }
 
@@ -103,7 +98,7 @@ private struct VideoRowContent: View {
                 .onDisappear {
                     cleanup()
                 }
-                .onChange(of: input.url) { newValue in
+                .onChange(of: input.url) { _, newValue in
                     if !newValue.isEmpty, let newURL = URL(string: newValue) {
                         setupVideo(url: newURL)
                     } else {
@@ -151,49 +146,23 @@ private struct VideoRowContent: View {
 
     @MainActor
     private func setupMJPEG(url: URL) {
-        // Create a dummy UIImageView for the SimpleMJPEGPlayer
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-
         mjpegPlayer = VideoStreamManager.shared.getOrCreateStream(
             for: url,
-            imageView: imageView,
-            onFirstFrame: { newAspectRatio in
-                Task { @MainActor in
-                    aspectRatio = newAspectRatio
+            onFrame: { image in
+                mjpegImage = image
+                if isLoading {
                     isLoading = false
                 }
             },
-            onError: { error in
-                Task { @MainActor in
-                    logger.debug("MJPEG stream error: \(error.localizedDescription)")
-                    isLoading = false
-                }
+            onFirstFrame: { newAspectRatio in
+                aspectRatio = newAspectRatio
+                isLoading = false
+            },
+            onError: { [logger] error in
+                logger.debug("MJPEG stream error: \(error.localizedDescription)")
+                isLoading = false
             }
         )
-
-        // Observe image changes on the UIImageView
-        startImageObservation(imageView: imageView)
-    }
-
-    @MainActor
-    private func startImageObservation(imageView: UIImageView) {
-        imageObservationTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { _ in
-            DispatchQueue.main.async {
-                if mjpegPlayer == nil {
-                    imageObservationTimer?.invalidate()
-                    imageObservationTimer = nil
-                    return
-                }
-
-                if let image = imageView.image {
-                    mjpegImage = image
-                    if isLoading {
-                        isLoading = false
-                    }
-                }
-            }
-        }
     }
 
     private func setupHLS(url: URL) {
@@ -206,9 +175,9 @@ private struct VideoRowContent: View {
                 switch item.status {
                 case .readyToPlay:
                     isLoading = false
-                    if item.presentationSize != .zero {
-                        let newAspectRatio = item.presentationSize.width / item.presentationSize.height
-                        aspectRatio = newAspectRatio
+                    let size = item.presentationSize
+                    if size.height > 0 {
+                        aspectRatio = size.width / size.height
                     }
                     // Auto-play when ready
                     player?.play()
@@ -223,10 +192,6 @@ private struct VideoRowContent: View {
     }
 
     private func cleanup() {
-        // Clean up timer
-        imageObservationTimer?.invalidate()
-        imageObservationTimer = nil
-
         // Clean up HLS observer
         playerObserver = nil
 

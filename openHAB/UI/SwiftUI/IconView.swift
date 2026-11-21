@@ -52,8 +52,7 @@ final class IconReloadCoordinator: ObservableObject {
     }
 
     func didBecomeActive(now: Date = Date()) {
-        guard let backgroundedAt else { return }
-        self.backgroundedAt = nil
+        guard let backgroundedAt = backgroundedAt.take() else { return }
         if now.timeIntervalSince(backgroundedAt) >= Self.reloadThreshold {
             reloadEpoch += 1
         }
@@ -88,7 +87,7 @@ struct IconInputView: View {
     let input: RowIconInput
     let rowIdentity: String
     let fallbackSymbol: SFSymbol?
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
     @ObservedObject private var iconReloader = IconReloadCoordinator.shared
     @Environment(\.colorScheme) private var colorScheme
 
@@ -141,7 +140,7 @@ struct IconInputView: View {
             if let fallbackSymbol, currentImage == nil {
                 Image(systemSymbol: fallbackSymbol)
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: size.width * 0.75, height: size.height * 0.75)
                     .foregroundStyle(.primary)
             } else {
@@ -178,7 +177,7 @@ struct IconInputView: View {
                     .placeholder { _ in
                         Image(uiImage: currentImage ?? .init()).resizable()
                     }
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: size.width, height: size.height)
                     .id("\(iconURL.absoluteString)-\(colorScheme)-\(iconReloader.reloadEpoch)")
                     .onAppear {
@@ -276,7 +275,7 @@ struct IconInputView: View {
 /// A SwiftUI view that displays widget icons with openHAB-specific styling and caching
 struct IconView: View {
     @ObservedObject var widget: OpenHABWidget
-    @ObservedObject private var networkTracker = MainActorNetworkTracker.shared
+    var networkTracker = MainActorNetworkTracker.shared
     @ObservedObject private var iconReloader = IconReloadCoordinator.shared
     @Environment(\.colorScheme) private var colorScheme
 
@@ -333,7 +332,7 @@ struct IconView: View {
             if let fallbackSymbol {
                 Image(systemSymbol: fallbackSymbol)
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: size.width * 0.75, height: size.height * 0.75)
                     .foregroundStyle(.primary)
             } else {
@@ -371,7 +370,7 @@ struct IconView: View {
                         // Workaround to show current image before new image is displayed. See https://github.com/onevcat/Kingfisher/issues/2028
                         Image(uiImage: currentImage ?? .init()).resizable()
                     }
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: size.width, height: size.height)
                     .id("\(iconURL.absoluteString)-\(colorScheme)-\(iconReloader.reloadEpoch)")
                     .onAppear {

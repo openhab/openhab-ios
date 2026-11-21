@@ -5548,6 +5548,14 @@
         "responses": {
           "201": {
             "description": "Subscription created.",
+            "headers": {
+              "Location": {
+                "description": "Newly created sitemap event subscription",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "200": {
             "description": "OK",
@@ -5860,11 +5868,10 @@
           "200": {
             "description": "OK",
             "content": {
-              "text/event-stream": {},
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SitemapWidgetEvent"
-                }
+              "text/event-stream": {
+                  "schema": {
+                      "$ref": "#/components/schemas/SitemapEvent"
+                  }
               }
             }
           },
@@ -9561,6 +9568,18 @@
           }
         }
       },
+      "SitemapEvent" : {
+             "type" : "object",
+             "properties" : {
+               "sitemapName" : { "type" : "string" },
+               "pageId" : { "type" : "string" }
+             },
+             "oneOf" : [
+               { "$ref" : "#/components/schemas/SitemapWidgetEvent" },
+               { "$ref" : "#/components/schemas/SitemapChangedEvent" },
+               { "$ref" : "#/components/schemas/ServerAliveEvent" }
+             ]
+           },
       "SitemapWidgetEvent": {
         "type": "object",
         "properties": {
@@ -9608,6 +9627,25 @@
           }
         }
       },
+      "SitemapChangedEvent" : {
+            "required" : [ "TYPE" ],
+            "type" : "object",
+            "properties" : {
+              "sitemapName" : { "type" : "string" },
+              "pageId" : { "type" : "string" },
+              "TYPE" : { "type" : "string", "readOnly" : true, "enum" : [ "SITEMAP_CHANGED" ] }
+            }
+          },
+          "ServerAliveEvent" : {
+            "required" : [ "TYPE" ],
+            "type" : "object",
+            "properties" : {
+              "sitemapName" : { "type" : "string" },
+              "pageId" : { "type" : "string" },
+              "TYPE" : { "type" : "string", "readOnly" : true, "enum" : [ "ALIVE" ] }
+            }
+          },
+      
       "SitemapDTO": {
         "type": "object",
         "properties": {

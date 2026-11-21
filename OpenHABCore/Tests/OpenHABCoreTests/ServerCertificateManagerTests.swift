@@ -51,7 +51,7 @@ struct ServerCertificateManagerTests {
         return (manager, delegate)
     }
 
-    // Clear all certificates before each test to ensure isolation
+    /// Clear all certificates before each test to ensure isolation
     func clearCertificateStore() async {
         let store = CertificateManagers.certificateStore
         let allCerts = await store.getAllCertificates()
@@ -78,7 +78,7 @@ struct ServerCertificateManagerTests {
         let (manager, _) = createTestContext()
         let trust = try dummyTrust()
         let domain = "accepted-test.openhab.org" // Unique domain
-        let cert = manager.getLeafCertificate(trust: trust)!
+        let cert = try #require(manager.getLeafCertificate(trust: trust))
         let certData = SecCertificateCopyData(cert) as Data
 
         // Store certificate in the shared store

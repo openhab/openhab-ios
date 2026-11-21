@@ -15,7 +15,6 @@ import UIKit
 
 private final class OpenHABSVGTestsBundleToken {}
 
-@Suite
 struct OpenHABSVGTests {
     private func renderSVG(named name: String) throws -> UIImage? {
         let bundle = Bundle(for: OpenHABSVGTestsBundleToken.self)
@@ -30,9 +29,9 @@ struct OpenHABSVGTests {
         return OpenHABImageProcessor().process(data: data)
     }
 
-    // The app-level contract is graceful SVG handling via OpenHABImageProcessor.
-    // Some fixtures are not directly decodable by Apple's built-in SVG renderer,
-    // but the processor must still return a fallback image instead of nil.
+    /// The app-level contract is graceful SVG handling via OpenHABImageProcessor.
+    /// Some fixtures are not directly decodable by Apple's built-in SVG renderer,
+    /// but the processor must still return a fallback image instead of nil.
     @Test
     func validSVGWithEmbeddedPNG() throws {
         let image = try renderSVG(named: "embeddedpng_valid")

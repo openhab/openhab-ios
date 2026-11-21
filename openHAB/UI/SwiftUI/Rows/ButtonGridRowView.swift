@@ -83,7 +83,9 @@ private struct ButtonGridButton: View {
     }
 
     private var isChecked: Bool {
-        if button.stateless { return false }
+        if button.stateless {
+            return false
+        }
         return button.effectiveState == button.command
     }
 

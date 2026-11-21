@@ -183,7 +183,7 @@ private struct BrightnessSliderView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            Text("\(Int((selection.brightness * 100).rounded())) %")
+            Text(verbatim: selection.brightness.formatted(.percent.precision(.fractionLength(0))))
                 .ohTextToken(.secondary)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
@@ -296,7 +296,6 @@ private struct BrightnessButton: View {
         Image(systemSymbol: symbol)
             .font(.title2)
             .foregroundStyle(Color(UIColor.systemBlue))
-            .ohMinimumHitTarget()
             .contentShape(Rectangle())
             .accessibilityLabel(accessibilityLabel)
             .accessibilityAddTraits(.isButton)
@@ -418,11 +417,11 @@ private struct ColorPickerRowContent: View {
         .onAppear {
             applyServerState(displayState.effectiveState)
         }
-        .onChange(of: displayState.effectiveState) { newState in
+        .onChange(of: displayState.effectiveState) { _, newState in
             guard !isEditingColor, !isPresentingColorWheel else { return }
             applyServerState(newState)
         }
-        .onChange(of: selection) { _ in
+        .onChange(of: selection) {
             sendColorCommand()
         }
         .sheet(isPresented: $isPresentingColorWheel) {

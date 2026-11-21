@@ -82,7 +82,6 @@ private struct RollershutterRowContent: View {
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
-                .ohMinimumHitTarget()
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerDownFeedback)
 
                 Button {
@@ -95,7 +94,6 @@ private struct RollershutterRowContent: View {
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
-                .ohMinimumHitTarget()
                 .sensoryStopFeedbackIfAvailable(trigger: triggerStopFeedback)
 
                 Button {
@@ -108,7 +106,6 @@ private struct RollershutterRowContent: View {
                         .foregroundStyle(Color(UIColor.systemBlue))
                 }
                 .buttonStyle(.plain)
-                .ohMinimumHitTarget()
                 .sensoryHeavyFeedbackIfAvailable(trigger: triggerUpFeedback)
             }
             .padding(.trailing, -2)

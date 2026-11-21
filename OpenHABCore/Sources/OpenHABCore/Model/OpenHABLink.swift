@@ -11,7 +11,7 @@
 
 import Foundation
 
-struct OpenHABLink: Decodable, Sendable {
+struct OpenHABLink: Decodable {
     var type: String?
     var url: String?
 }

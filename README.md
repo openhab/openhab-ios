@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Logo" src="openHAB/Images.xcassets/AppIcon.appiconset/Icon.png" width="100">
+    <img alt="Logo" src="openHAB/Images/Images.xcassets/launchImage.imageset/launchImage.png" width="100">
     <br>
     <b>openHAB client for iOS</b>
 </p>
@@ -18,18 +18,22 @@ This is the IOS native client for openHAB.
 ### openHAB (Current)
 
 This is the primary openHAB app which contains the latest features and is updated regularly. This includes Apple Watch support, enhanced notifications, shortcuts and more.
-Requires at least iOS 16 and openHAB 2.x and later.
+Requires at least iOS 18 and openHAB 2.x and later.
 
 <a href="https://itunes.apple.com/us/app/openhab/id6505005945"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store"></a>
 
+There are 2 [TestFlight](https://testflight.apple.com) tester groups: 
 
-Beta releases are available on [TestFlight](https://testflight.apple.com/join/0uFYONeF).
+**Stable Betas** – for those who want to help validate upcoming releases before they reach the App Store - are available on [TestFlight Stable Beta](https://testflight.apple.com/join/0uFYONeF).
+
+**Feature Preview** – for people who enjoy testing new functionality early, even if it’s still under active development:
+[TestFlight Feature Preview](https://testflight.apple.com/join/fxEXH1qV).
 
 <a href="https://testflight.apple.com/join/0uFYONeF"><img src="https://developer.apple.com/assets/elements/icons/testflight/testflight-128x128_2x.png" width="100" alt="Download on TestFlight"></a>
 
 ### openHAB V1 (Legacy)
 
-This is the legacy app for users on iOS 15 or earlier as well as openHAB system 1.x and later (tested to at least openHAB 4).
+This is the legacy app for users on iOS 17 or earlier as well as openHAB system 1.x and later (tested to at least openHAB 4).
 This app only receives security updates and minor fixes and is not intended for most users. 
 
 <a href="https://itunes.apple.com/us/app/openhab/id492054521?ls=1&mt=8"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store"></a>
@@ -257,17 +261,20 @@ Also see [Action Syntax](#action-syntax) for more information on actions that ca
 
 ## Shortcuts
 
-The app supports exposes several actions that let you control your openHAB installation from the Shortcuts app.
+The app exposes several actions that let you control your openHAB installation from the Shortcuts app.
+
+All actions accept an optional **Home** parameter. When omitted the active home is used; when set it overrides the home for that step, which is useful in multi-home shortcuts.
 
 **Supported actions**
 
 - **Get Item State** – Retrieves the current state of any item.
   - Returns the item’s state text so it can be used by later steps in a shortcut.
 
-- **Set Switch State** – Sends an `ON` or `OFF` command to a Switch item.
-  - Action – `ON` / `OFF`
+- **Set Switch State** – Sends a command to a Switch item.
+  - Action – `On` / `Off` / `Toggle`
+  - `Toggle` flips the current state without needing to know it in advance.
 
-- **Set Dimmer or Roller Shutter Value** – Sends an integer value (0-100) to Dimmer or Rollershutter items.
+- **Set Dimmer or Roller Shutter Value** – Sends an integer value (0–100) to Dimmer or Rollershutter items.
   - Value – 0 … 100
 
 - **Set Number Item Value** – Writes a decimal value to any Number item.
@@ -277,17 +284,30 @@ The app supports exposes several actions that let you control your openHAB insta
   - Value – text
 
 - **Set Color Item Value** – Sends a color command in HSB format `Hue,Saturation,Brightness` (e.g. `240,100,100` for blue) to a Color item.
-  - Value – HSB string
+  - Value – HSB string (hue 0–360, saturation 0–100, brightness 0–100)
 
-- **Set Contact Item State** – Sets a Contact item to `OPEN` or `CLOSED` (contacts are typically read-only however).
-  - State – `OPEN` / `CLOSED`
+- **Set Contact Item State** – Sets a Contact item to `Open` or `Closed` (contacts are typically read-only however).
+  - State – `Open` / `Closed`
+
+- **Set Player Control Value** – Sends a transport command to a Player item.
+  - Action – `Play` / `Pause` / `Next` / `Previous` / `Rewind` / `Fast Forward`
+
+- **Set DateTime Control Value** – Sets the date and time of a DateTime item using the system date/time picker.
+  - Value – date and time
+
+- **Set Location Control Value** – Sends a GPS coordinate to a Location item.
+  - Latitude – decimal degrees (−90 … 90)
+  - Longitude – decimal degrees (−180 … 180)
+
+- **Set Active Home** – Switches the active home in the app, equivalent to selecting a home from the side menu.
+  - Home – home name
 
 ## Setting up development environment
 
 If you want to contribute to the iOS application we are here to help you to set up
 development environment. 
 openHAB iOS app is developed using Xcode and the standard iOS SDK from Apple.
-The iOS application is based on the iOS 16 and watchOS 8 SDK and makes uses of several Swift packages.
+The iOS application targets iOS 18 and watchOS 11 and makes uses of several Swift packages.
 
 To start developing you need an [Apple Developer](https://developer.apple.com/devcenter/ios/index.action) account.
 
@@ -548,6 +568,16 @@ Additional voices, including custom and novelty voices can be downloaded in the 
 | Rocko      | zh-TW    |
 
 
+
+## Development
+
+Open `openHAB.xcworkspace` in Xcode. Fastlane lanes (unit tests, screenshots, beta builds) run through Bundler, so install the pinned Ruby dependencies once with:
+
+```sh
+bundle install
+```
+
+and prefix fastlane commands with `bundle exec`, e.g. `bundle exec fastlane unittests`.
 
 ## Trademark Disclaimer
 Product names, logos, brands and other trademarks referred to within the openHAB website are the

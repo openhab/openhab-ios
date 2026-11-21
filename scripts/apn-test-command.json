@@ -1,0 +1,6 @@
+ {
+    "Simulator Target Bundle": "org.openhab.app",
+    "aps": { "alert": { "title": "openHAB", "body": "Tap me" } },
+    "message": "Tap me",
+    "on-click": "command:lcnLightSwitch44_1:ON"
+  }

@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "OpenHABCore",
-    platforms: [.iOS(.v16), .watchOS(.v10), .macOS(.v14)],
+    platforms: [.iOS(.v18), .watchOS(.v11), .macOS(.v15)],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -15,10 +15,10 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/onevcat/Kingfisher.git", from: "8.6.1"),
-        .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.1.0"),
-        .package(url: "https://github.com/apple/swift-http-types.git", from: "1.5.1"),
+        .package(url: "https://github.com/onevcat/Kingfisher.git", from: "8.12.0"),
+        .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.12.1"),
+        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.3.2"),
+        .package(url: "https://github.com/apple/swift-http-types.git", from: "1.7.0"),
         .package(url: "https://github.com/SDWebImage/SDWebImage.git", from: "5.21.5"),
         .package(url: "https://github.com/SDWebImage/SDWebImageSVGCoder.git", from: "1.4.0"),
         .package(url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git", from: "7.0.0"),

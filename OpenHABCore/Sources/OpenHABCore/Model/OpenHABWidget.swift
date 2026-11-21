@@ -9,10 +9,17 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-@_exported import Combine
+import Combine
 import Foundation
 @_exported import MapKit
 import os.log
+
+public enum SitemapWidgetEventApplicationResult: Equatable, Sendable {
+    case applied
+    case unchanged
+    case notFound
+    case requiresPageReload
+}
 
 public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
     public enum WidgetType: String, Decodable, Sendable {
@@ -109,8 +116,13 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var stateless: Bool?
     public var yAxisDecimalPattern: String?
 
-    public var widgetType: WidgetType { type }
-    public var hasLinkedPage: Bool { linkedPage != nil }
+    public var widgetType: WidgetType {
+        type
+    }
+
+    public var hasLinkedPage: Bool {
+        linkedPage != nil
+    }
 
     public var coordinate: CLLocationCoordinate2D {
         item?.stateAsLocation()?.coordinate ?? kCLLocationCoordinate2DInvalid
@@ -118,7 +130,7 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 }
 
 public extension OpenHABWidget {
-    // This is an ugly initializer
+    /// This is an ugly initializer
     convenience init(widgetId: String,
                      label: String,
                      icon: String,
@@ -219,19 +231,145 @@ public extension OpenHABWidget {
     }
 
     convenience init(icon: String, iconColor: String? = nil) {
+        // swiftlint:disable:next line_length
         self.init(widgetId: "\(UUID())", label: "", icon: icon, type: .unknown, url: nil, period: nil, minValue: nil, maxValue: nil, step: nil, refresh: nil, height: nil, isLeaf: nil, iconColor: iconColor, labelColor: nil, valueColor: nil, service: nil, state: nil, text: nil, legend: nil, inputHint: nil, encoding: nil, item: nil, linkedPage: nil, mappings: [], widgets: [], visibility: nil, switchSupport: nil, forceAsItem: nil, labelSource: .unknown, releaseOnly: nil)
     }
 }
 
-//  Recursive parsing of nested widget structure
+/// Associated-object key for parentWidgetId — avoids changing OpenHABWidget's stored-property
+/// layout, which would corrupt Combine's @Published field scan under concurrent test execution.
+private nonisolated(unsafe) var parentWidgetIdKey: UInt8 = 0
+
+public extension OpenHABWidget {
+    var parentWidgetId: String? {
+        get { objc_getAssociatedObject(self, &parentWidgetIdKey) as? String }
+        set { objc_setAssociatedObject(self, &parentWidgetIdKey, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC) }
+    }
+}
+
+///  Recursive parsing of nested widget structure
 public extension [OpenHABWidget] {
-    mutating func flatten(_ widgets: [Element]) {
+    mutating func flatten(_ widgets: [Element], parentWidgetId: String? = nil) {
         for widget in widgets {
+            widget.parentWidgetId = parentWidgetId
             append(widget)
             if widget.type != .buttongrid {
-                flatten(widget.widgets)
+                flatten(widget.widgets, parentWidgetId: widget.widgetId)
             }
         }
+    }
+}
+
+/// Filters a flat, pre-flattened widget list to only those that should be displayed,
+/// mirroring Android's visibility logic:
+///   - widget.visibility == false → hidden
+///   - frame with no visible direct children (including empty frames) → hidden
+///   - widget whose nearest frame ancestor is hidden → hidden
+public func sitemapVisibleWidgets(_ widgets: [OpenHABWidget]) -> [OpenHABWidget] {
+    var widgetsById: [String: OpenHABWidget] = [:]
+    for widget in widgets {
+        widgetsById[widget.widgetId] = widget
+    }
+
+    func shouldShow(_ widget: OpenHABWidget) -> Bool {
+        guard widget.visibility else { return false }
+        if widget.type == .frame {
+            let children = widgets.filter { $0.parentWidgetId == widget.widgetId }
+            if !children.contains(where: \.visibility) {
+                return false
+            }
+        }
+        guard let parentId = widget.parentWidgetId,
+              let parent = widgetsById[parentId] else { return true }
+        return shouldShow(parent)
+    }
+
+    return widgets.filter { shouldShow($0) }
+}
+
+public extension [OpenHABWidget] {
+    /// Applies a sitemap event to the first widget it concerns, looking into child widgets too.
+    @discardableResult
+    func apply(event: OpenHABSitemapWidgetEvent) -> SitemapWidgetEventApplicationResult {
+        for widget in self {
+            let result = widget.apply(event: event)
+            if result != .notFound {
+                return result
+            }
+        }
+        return .notFound
+    }
+}
+
+public extension OpenHABWidget {
+    @discardableResult
+    func apply(event: OpenHABSitemapWidgetEvent) -> SitemapWidgetEventApplicationResult {
+        guard let eventWidgetId = event.widgetId else { return .notFound }
+
+        if widgetId == eventWidgetId {
+            guard event.descriptionChanged != true else {
+                return .requiresPageReload
+            }
+            // reloadIcon arrives on virtually every SSE event but carries no
+            // displayable payload of its own — skip the rebuild if nothing else changed.
+            guard event.label != nil || event.icon != nil || event.state != nil
+                || event.enrichedItem != nil || event.labelcolor != nil
+                || event.valuecolor != nil || event.iconcolor != nil
+                || event.visibility != nil || event.labelSource != nil
+            else { return .unchanged }
+            if let label = event.label {
+                self.label = label
+            }
+            if let icon = event.icon {
+                self.icon = icon
+            }
+            // The server re-evaluates all three color expressions together whenever the
+            // widget's underlying item state changes, and omits a color entirely (rather
+            // than sending "") once its condition no longer matches — so on a state-driven
+            // event, an absent color means "cleared", not "unchanged". Without this, a
+            // color that matched once (e.g. iconcolor=[==ON="orange"]) would stick forever
+            // after the item went back to a non-matching state, until the next full sitemap
+            // reload rebuilt the widget from scratch. A non-state event (icon reload,
+            // visibility, …) never touches colors, so leave them alone there.
+            if event.state != nil || event.enrichedItem != nil {
+                labelcolor = event.labelcolor ?? ""
+                valuecolor = event.valuecolor ?? ""
+                iconColor = event.iconcolor ?? ""
+            } else {
+                if let labelcolor = event.labelcolor {
+                    self.labelcolor = labelcolor
+                }
+                if let valuecolor = event.valuecolor {
+                    self.valuecolor = valuecolor
+                }
+                if let iconcolor = event.iconcolor {
+                    iconColor = iconcolor
+                }
+            }
+            if let visibility = event.visibility {
+                self.visibility = visibility
+            }
+            if let state = event.state {
+                self.state = state
+            } else if let itemState = event.enrichedItem?.state {
+                state = itemState
+            }
+            if let item = event.enrichedItem {
+                self.item = item
+            }
+            if let labelSource = event.labelSource {
+                self.labelSource = OpenHABWidget.LabelSource(rawValue: labelSource) ?? .unknown
+            }
+            return .applied
+        }
+
+        for widget in widgets {
+            let result = widget.apply(event: event)
+            if result != .notFound {
+                return result
+            }
+        }
+        return .notFound
     }
 }
 

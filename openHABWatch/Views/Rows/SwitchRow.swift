@@ -15,7 +15,7 @@ import SwiftUI
 
 struct SwitchRow: View {
     let widget: OpenHABWidget
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
     let stateToken: String
     @State private var localIsOn: Bool?
     @State private var commandSender = WidgetCommandDispatcher()
@@ -46,6 +46,7 @@ struct SwitchRow: View {
         }
         .padding(.trailing)
         .cornerRadius(5)
+        .disabled(widget.item?.readOnly == true)
         .accessibilityValue(isOn ? "On" : "Off")
         .onChange(of: stateToken) {
             localIsOn = nil
@@ -71,5 +72,5 @@ struct SwitchRow: View {
     NavigationStack {
         SwitchRow(widget: widget, stateToken: widget.item?.state ?? "OFF")
     }
-    .environmentObject(mockSettings)
+    .environment(mockSettings)
 }

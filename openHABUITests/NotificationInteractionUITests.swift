@@ -1,0 +1,179 @@
+// Copyright (c) 2010-2026 Contributors to the openHAB project
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information.
+//
+// This program and the accompanying materials are made available under the
+// terms of the Eclipse Public License 2.0 which is available at
+// http://www.eclipse.org/legal/epl-2.0
+//
+// SPDX-License-Identifier: EPL-2.0
+
+import XCTest
+
+// MARK: - Fixtures
+
+private enum InteractionFixture {
+    static let toastTitle = "UITest Interaction Alert"
+    static let toastMessage = "Motion detected."
+    /// JSON-encoded action list for UITestToastActions
+    static let actionsJSON = #"[{"title":"Open Camera","action":"ui:/overview"}]"#
+}
+
+// MARK: - Test class
+
+@MainActor
+final class NotificationInteractionUITests: XCTestCase {
+    private var app: XCUIApplication!
+
+    private var screen: CGRect {
+        app.windows.firstMatch.frame
+    }
+
+    override func setUp() async throws {
+        try await super.setUp()
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.useEnglishLocale()
+        app.launchEnvironment["UITest"] = "1"
+    }
+
+    override func tearDown() async throws {
+        app = nil
+        try await super.tearDown()
+    }
+
+    // MARK: - Helpers
+
+    @discardableResult
+    private func waitFor(_ text: String, timeout: TimeInterval = 4) -> XCUIElement {
+        let el = app.staticTexts[text]
+        XCTAssertTrue(el.waitForExistence(timeout: timeout), "Expected '\(text)' to appear within \(timeout)s")
+        return el
+    }
+
+    @discardableResult
+    private func waitForButton(_ label: String, timeout: TimeInterval = 4) -> XCUIElement {
+        let el = app.buttons[label]
+        XCTAssertTrue(el.waitForExistence(timeout: timeout), "Expected button '\(label)' to appear within \(timeout)s")
+        return el
+    }
+
+    private func launchWithToastAndActions() {
+        app.launchEnvironment["UITestToastTitle"] = InteractionFixture.toastTitle
+        app.launchEnvironment["UITestToastMessage"] = InteractionFixture.toastMessage
+        app.launchEnvironment["UITestToastActions"] = InteractionFixture.actionsJSON
+        app.launch()
+    }
+
+    /// Opens the list the way a user does, from the menu. `UITestNotifications` puts the entry in
+    /// the menu and fills the list.
+    private func launchWithNotificationList() {
+        app.launchEnvironment["UITestNotifications"] = "1"
+        app.launch()
+
+        let menuButton = app.buttons["HamburgerButton"]
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 10), "The menu button is there")
+        menuButton.tap()
+        waitForButton("Notifications", timeout: 5).tap()
+    }
+
+    // MARK: - Toast action button tests
+
+    func testToastActionButtonAppears() {
+        launchWithToastAndActions()
+
+        let title = waitFor(InteractionFixture.toastTitle)
+        let button = waitForButton("Open Camera")
+        XCTAssertTrue(button.isHittable, "Action button must be on-screen and hittable")
+
+        // Layout assertions — loose thresholds so minor spacing changes don't break them.
+        let s = screen
+        // Toast banner must sit in the lower portion of the screen (not at screen centre).
+        XCTAssertGreaterThan(
+            title.frame.minY,
+            s.height * 0.5,
+            "Toast title must appear in the lower half of the screen"
+        )
+        // Action button must be on the right side (action control is right-aligned).
+        XCTAssertGreaterThan(
+            button.frame.minX,
+            s.width * 0.45,
+            "Action button must be on the right side of the banner"
+        )
+        // Action button and title must share roughly the same vertical centre (horizontal layout).
+        XCTAssertLessThan(
+            abs(button.frame.midY - title.frame.midY),
+            30,
+            "Action button and title must be at similar vertical positions"
+        )
+    }
+
+    func testToastActionButtonDismissesToast() {
+        launchWithToastAndActions()
+
+        waitFor(InteractionFixture.toastTitle)
+        waitForButton("Open Camera").tap()
+
+        let gone = NSPredicate(format: "exists == false")
+        let expectation = expectation(for: gone, evaluatedWith: app.staticTexts[InteractionFixture.toastTitle])
+        wait(for: [expectation], timeout: 2)
+    }
+
+    func testToastBodyTapWithActionsStillDismisses() {
+        launchWithToastAndActions()
+
+        let title = waitFor(InteractionFixture.toastTitle)
+        title.tap()
+
+        let gone = NSPredicate(format: "exists == false")
+        let expectation = expectation(for: gone, evaluatedWith: app.staticTexts[InteractionFixture.toastTitle])
+        wait(for: [expectation], timeout: 2)
+    }
+
+    // MARK: - Notification list interaction tests
+
+    /// A row's actions live in its context menu, which a long press opens.
+    func testNotificationRowWithActionsShowsButton() {
+        launchWithNotificationList()
+
+        // Wait for the mock data to load
+        let alertText = waitFor("UITest Front Door Alert")
+        alertText.press(forDuration: 1)
+        let button = waitForButton("Open Camera")
+        XCTAssertTrue(button.isHittable, "Action button must be visible in the row's context menu")
+    }
+
+    func testNotificationRowActionButtonDismissesSheet() {
+        launchWithNotificationList()
+
+        waitFor("UITest Front Door Alert").press(forDuration: 1)
+        waitForButton("Open Camera").tap()
+
+        let gone = NSPredicate(format: "exists == false")
+        let expectation = expectation(for: gone, evaluatedWith: app.staticTexts["UITest Front Door Alert"])
+        wait(for: [expectation], timeout: 2)
+    }
+
+    func testNotificationRowWithOnClickIsTappable() {
+        launchWithNotificationList()
+
+        // The row with onClickAction should be hittable (tappable region exists)
+        let alertText = waitFor("UITest Front Door Alert")
+        XCTAssertTrue(alertText.isHittable, "Notification row with on-click action must be hittable")
+    }
+
+    func testNotificationRowWithoutActionsHasNoActionButton() {
+        launchWithNotificationList()
+
+        // "UITest Regular Info" has no actions, so its long press opens no menu.
+        waitFor("UITest Regular Info").press(forDuration: 1)
+        let actionButton = app.buttons["Open Camera"]
+        XCTAssertFalse(actionButton.waitForExistence(timeout: 1), "A row without actions should show no 'Open Camera' button")
+
+        // The row that has the action does.
+        waitFor("UITest Front Door Alert").press(forDuration: 1)
+        waitForButton("Open Camera")
+        XCTAssertEqual(app.buttons.matching(identifier: "Open Camera").count, 1, "Only the row with actions should show an 'Open Camera' button")
+    }
+}

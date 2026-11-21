@@ -10,29 +10,23 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import AVFoundation
-import Combine
+import CarPlay
 import Firebase
 import FirebaseMessaging
 import Kingfisher
 import OpenHABCore
 import os.log
 import SDWebImageSVGCoder
-import SwiftMessages
 import UIKit
 @preconcurrency import UserNotifications
 import WatchConnectivity
 
-@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    static var appDelegate: AppDelegate!
+    private var crashlyticsTask: Task<Void, Never>?
 
-    var window: UIWindow?
+    let notificationDelegate = NotificationCenterDelegateImpl()
 
-    private var crashlyticsSubscriber: AnyCancellable?
-
-    private let notificationDelegate = NotificationCenterDelegateImpl()
-
-    // Delegate Requests from the Watch to the WatchMessageService
+    /// Delegate Requests from the Watch to the WatchMessageService
     var session: WCSession? {
         didSet {
             if let session {
@@ -41,7 +35,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 session.activate()
                 Logger.appDelegate.info("Paired watch \(session.isPaired), watch app installed \(session.isWatchAppInstalled)")
                 Task {
-                    await watchMessageService.subscribeToPreferences()
+                    watchMessageService.subscribeToPreferences()
                 }
             }
         }
@@ -49,7 +43,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     override init() {
         super.init()
-        AppDelegate.appDelegate = self
+    }
+
+    @MainActor
+    private static func postApsRegistration(fcmToken: String) {
+        let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "UnknownDeviceID"
+        let deviceName = UIDevice.current.name
+
+        Logger.appDelegate.info("My FCM token is: \(fcmToken, privacy: .private)")
+
+        let dataDict: [String: Any] = [
+            "deviceToken": fcmToken,
+            "deviceId": deviceID,
+            "deviceName": deviceName
+        ]
+
+        NotificationCenter.default.post(
+            name: NSNotification.Name("apsRegistered"),
+            object: nil,
+            userInfo: dataDict
+        )
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
@@ -59,7 +72,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let appDefaults = ["CacheDataAgressively": NSNumber(value: true)]
         UserDefaults.standard.register(defaults: appDefaults)
 
-        Preferences.migratePreferences()
+        Task { _ = await Preferences.shared.listStoredHomes() }
+        SitemapDiagnostics.markProcessLaunch(source: launchSource(launchOptions))
 
         // Firebase must be configured before the storyboard loads its root view controller,
         // because OpenHABRootViewController.viewDidLoad calls Crashlytics before the deferred
@@ -81,6 +95,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    private func launchSource(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> String {
+        guard let launchOptions, !launchOptions.isEmpty else { return "user" }
+        if launchOptions[.remoteNotification] != nil {
+            return "remoteNotification"
+        }
+        if launchOptions[.url] != nil {
+            return "url"
+        }
+        if launchOptions[.location] != nil {
+            return "location"
+        }
+        return "other"
+    }
+
     /// Setup that can be deferred until after the UI appears
     @MainActor
     private func performDeferredSetup() {
@@ -99,26 +127,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         configureImageCoders()
 
-        /// load and start the screensaver
-        if let keyWindow = UIApplication.shared.firstKeyWindow {
-            var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.shared.screensaverEnabled
-            config.showsTime = Preferences.shared.screensaverShowsTime
-            config.showsDate = Preferences.shared.screensaverShowsDate
-            config.idleInterval = Preferences.shared.screensaverIdleInterval
-            config.movementInterval = Preferences.shared.screensaverMovementInterval
-            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
-            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
-
-            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
-        }
+        ScreenSaverManager.shared.applyCurrentPreferences()
+        // Start monitoring items for widget updates after the app is configured.
+        WidgetItemMonitor.shared.startMonitoring()
     }
 
     @MainActor
@@ -132,9 +143,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // init Firebase crash reporting
         FirebaseApp.configure()
         FirebaseApp.app()?.isDataCollectionDefaultEnabled = false
-        crashlyticsSubscriber = Preferences.shared.$sendCrashReports.sink {
-            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled($0)
-            Logger.appDelegate.debug("setCrashlyticsCollectionEnabled to \($0)")
+        crashlyticsTask = Task {
+            for await value in await Preferences.shared.sendCrashReportsStream {
+                Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(value)
+                Logger.appDelegate.debug("setCrashlyticsCollectionEnabled to \(value)")
+            }
         }
         Messaging.messaging().delegate = self
     }
@@ -163,38 +176,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
                 guard settings.authorizationStatus == .authorized else { return }
                 Task { @MainActor in
+                    Logger.appDelegate.info("Calling registerForRemoteNotifications")
                     UIApplication.shared.registerForRemoteNotifications()
                 }
             }
         }
     }
 
-    func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
-        // TODO: Pass this parameters to openHABViewController somehow to open specified sitemap/page and send specified command
-        // Probably need to do this in a way compatible to Android app's URL
-        Logger.appDelegate.info("Calling Application Bundle ID: \(options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String ?? "")")
-        Logger.appDelegate.info("URL: \(url.absoluteString)")
-        Logger.appDelegate.info("URL scheme: \(url.scheme ?? "")")
-        Logger.appDelegate.info("URL query: \(url.query ?? "")")
-
-        if url.isFileURL {
-            Logger.appDelegate.info("Loading Certificate")
-            let clientCertificateManager = CertificateManagers.clientCertificateManager
-            Task { @MainActor in
-                await clientCertificateManager.startImportClientCertificate(url: url)
-            }
-            return true
-        }
-
-        // remove the 'openhab' from the url
-        let action = url.absoluteString.split(separator: ":").dropFirst().joined(separator: ":")
-        notificationDelegate.notifyNotificationListeners(action: action)
-        return true
-    }
-
-    // This is only informational - on success - DID Register
+    /// FCM only mints a new registration token once it sees the APNs token change. Without this
+    /// it can keep serving a token whose APNs token Apple has since disabled, which my.openHAB
+    /// then accepts as a registration and pushes to forever, getting
+    /// registration-token-not-registered back on every send.
+    /// https://firebase.google.com/docs/cloud-messaging/ios/client#disable-swizzling-token
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        // Do nothing now, we are using FCM
+        Messaging.messaging().apnsToken = deviceToken
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
@@ -239,9 +234,50 @@ extension Notification.Name {
 
 extension AppDelegate {
     func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+        // Dismiss the screensaver overlay and restore brightness before the app leaves the
+        // foreground (Control Center, an incoming call, the app switcher, backgrounding, etc.),
+        // rather than leaving that cleanup to happen reactively on the next touch.
         NotificationCenter.default.post(name: .disableScreenSaver, object: nil)
+    }
+
+    func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
+        false
+    }
+
+    func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
+        // Explicitly opt out of UIKit state restoration. Without this, iOS defaults to
+        // attempting to restore any previously-saved archive for backward compatibility --
+        // including one saved by an older, storyboard-based build (pre-SwiftUI app lifecycle,
+        // see 6d89e35a). On a device upgraded in place from that older build, iOS tries to
+        // restore view controllers/storyboard IDs that no longer exist, producing a black,
+        // unresponsive screen with nothing logged (the failure happens before app code runs).
+        false
+    }
+
+    /// Info.plist sets UIApplicationSupportsSecureRestorableState, which makes iOS consult these
+    /// NSSecureCoding-based methods instead of the deprecated pair above. Both pairs are kept in
+    /// sync (both false) since which one iOS actually calls depends on that flag; the deprecated
+    /// pair stays as a defensive fallback.
+    func application(_ application: UIApplication, shouldSaveSecureApplicationState coder: NSCoder) -> Bool {
+        false
+    }
+
+    func application(_ application: UIApplication, shouldRestoreSecureApplicationState coder: NSCoder) -> Bool {
+        false
+    }
+
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        switch connectingSceneSession.role {
+        case .carTemplateApplication:
+            UISceneConfiguration(name: "CarPlay Configuration", sessionRole: connectingSceneSession.role)
+        default:
+            // Named distinctly from the old "Default Configuration" (storyboard-based
+            // SceneDelegate + Main.storyboard, removed in 6d89e35a): reusing that name would
+            // let iOS try to reconnect a UISceneSession cached from a build that had it,
+            // referencing a scene delegate/storyboard that no longer exists. A new name forces
+            // a fresh session instead of a reconnection attempt on in-place upgrade.
+            UISceneConfiguration(name: "SwiftUI Configuration", sessionRole: connectingSceneSession.role)
+        }
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
@@ -254,53 +290,32 @@ extension AppDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        if let keyWindow = UIApplication.shared.firstKeyWindow {
-            var config = ScreenSaverConfiguration()
-            config.isEnabled = Preferences.shared.screensaverEnabled
-            config.showsTime = Preferences.shared.screensaverShowsTime
-            config.showsDate = Preferences.shared.screensaverShowsDate
-            config.idleInterval = Preferences.shared.screensaverIdleInterval
-            config.movementInterval = Preferences.shared.screensaverMovementInterval
-            config.fontName = Preferences.shared.screensaverFontName.isEmpty ? nil : Preferences.shared.screensaverFontName
-            config.timeFontSizeRatio = CGFloat(Preferences.shared.screensaverTimeFontRatio)
-            config.dateFontRelativeSize = CGFloat(Preferences.shared.screensaverDateFontRatio)
-            config.enablesAutoDimming = Preferences.shared.screensaverEnableDimming
-            config.dimLevel = CGFloat(Preferences.shared.screensaverDimLevel)
-            config.wakeBrightnessLevel = CGFloat(Preferences.shared.screensaverWakeBrightness)
-            config.showsSeconds = Preferences.shared.screensaverShowsSeconds
-            config.uses24HourTime = Preferences.shared.screensaverUse24Hour
-            config.restoresBrightness = Preferences.shared.screensaverRestoreBrightness
+        NotificationCenter.default.post(name: .appDidBecomeActive, object: nil)
+        Task { @MainActor in
+            ScreenSaverManager.shared.applyCurrentPreferences()
+        }
 
-            ScreenSaverManager.shared.startMonitoring(window: keyWindow, configuration: config)
+        Task {
+            await WidgetItemMonitor.shared.cleanupStaleItems()
         }
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
+
+    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {}
 }
 
 extension AppDelegate: MessagingDelegate {
+    /// Called when the FCM token is created or refreshed.
     nonisolated func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard let fcmToken, !fcmToken.isEmpty else {
+            Logger.appDelegate.error("Received an empty FCM token")
+            return
+        }
         Task { @MainActor in
-            let safeToken = fcmToken ?? ""
-            let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "UnknownDeviceID"
-            let deviceName = UIDevice.current.name
-
-            Logger.appDelegate.info("My FCM token is: \(safeToken, privacy: .private)")
-
-            let dataDict: [String: Any] = [
-                "deviceToken": safeToken,
-                "deviceId": deviceID,
-                "deviceName": deviceName
-            ]
-
-            NotificationCenter.default.post(
-                name: NSNotification.Name("apsRegistered"),
-                object: self,
-                userInfo: dataDict
-            )
+            AppDelegate.postApsRegistration(fcmToken: fcmToken)
         }
     }
 }

@@ -35,6 +35,7 @@ public struct OpenHABItem: Sendable {
     public var groupType: ItemType?
     public var name = ""
     public var state: String?
+    public var transformedState: String?
     public var link = ""
     public var label = ""
     public var stateDescription: OpenHABStateDescription?
@@ -53,7 +54,7 @@ public struct OpenHABItem: Sendable {
             isOfTypeOrGroupType(ItemType.player)
     }
 
-    public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, commandDescription: OpenHABCommandDescription?, members: [OpenHABItem], category: String?, options: [OpenHABOptions]?) {
+    public init(name: String, type: String, state: String?, link: String, label: String?, groupType: String?, stateDescription: OpenHABStateDescription?, commandDescription: OpenHABCommandDescription?, members: [OpenHABItem], category: String?, options: [OpenHABOptions]?, transformedState: String? = nil) {
         self.name = name
         self.type = type.toItemType()
         if let state, state == "NULL" || state == "UNDEF" || state.caseInsensitiveCompare("undefined") == .orderedSame {
@@ -61,6 +62,7 @@ public struct OpenHABItem: Sendable {
         } else {
             self.state = state
         }
+        self.transformedState = transformedState.flatMap { $0.isEmpty ? nil : $0 }
         self.link = link
         self.label = label.orEmpty
         self.groupType = groupType?.toItemType()
@@ -80,6 +82,26 @@ public struct OpenHABItem: Sendable {
 extension OpenHABItem.ItemType: Decodable {}
 
 public extension OpenHABItem {
+    /// Best-effort human-readable state, shared by call sites that show an item's state
+    /// outside of a sitemap widget (Shortcuts intents, Home Screen widgets): prefers the
+    /// server-computed `transformedState`, then falls back to local number formatting —
+    /// but only when the raw state's leading token actually parses as a number, so a
+    /// non-numeric string (e.g. a String item) that merely starts with a digit isn't
+    /// truncated to that leading number — and otherwise returns the raw state unchanged.
+    /// Returns nil only when the item has no state at all; callers supply their own
+    /// "no state" fallback text.
+    var displayState: String? {
+        guard let rawState = state else { return nil }
+        if let transformed = transformedState, !transformed.isEmpty {
+            return transformed
+        }
+        if let pattern = stateDescription?.numberPattern,
+           Double(rawState.components(separatedBy: " ").first ?? "") != nil {
+            return rawState.parseAsNumber(format: pattern).toString(locale: .current)
+        }
+        return rawState
+    }
+
     func stateAsDouble() -> Double {
         state?.numberValue?.doubleValue ?? 0
     }
@@ -152,7 +174,8 @@ extension OpenHABItem {
                 commandDescription: OpenHABCommandDescription(item.commandDescription),
                 members: [],
                 category: item.category,
-                options: []
+                options: [],
+                transformedState: item.transformedState
             )
         } else {
             return nil

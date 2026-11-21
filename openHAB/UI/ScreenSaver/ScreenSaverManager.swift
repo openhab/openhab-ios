@@ -15,8 +15,13 @@ import SwiftUI
 import UIKit
 
 private class ScreenSaverHostingViewController: UIViewController {
-    override var prefersStatusBarHidden: Bool { true }
-    override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { .fade }
+    override var prefersStatusBarHidden: Bool {
+        true
+    }
+
+    override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
+        .fade
+    }
 }
 
 @MainActor
@@ -33,6 +38,12 @@ final class ScreenSaverManager: NSObject {
 
     private var previousBrightness: CGFloat?
 
+    private var screen: UIScreen? {
+        window?.windowScene?.screen
+    }
+
+    private var lastActivity: Date?
+
     override private init() {
         super.init()
         NotificationCenter.default.addObserver(self, selector: #selector(handleDisableNotification), name: .disableScreenSaver, object: nil)
@@ -43,8 +54,26 @@ final class ScreenSaverManager: NSObject {
     func startMonitoring(window: UIWindow, configuration: ScreenSaverConfiguration = ScreenSaverConfiguration()) {
         self.configuration = configuration
         self.window = window
-        attachGestureRecognizers(to: window)
         resetIdleTimer()
+    }
+
+    /// Convenience variant that finds the key window internally — callers
+    /// outside the UIKit layer do not need to pass a UIWindow.
+    func startMonitoring(configuration: ScreenSaverConfiguration = ScreenSaverConfiguration()) {
+        guard let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive })?
+            .windows
+            .first(where: { $0.isKeyWindow }) else { return }
+        startMonitoring(window: keyWindow, configuration: configuration)
+    }
+
+    /// Fetches the current screensaver preferences in one actor hop and (re)starts monitoring.
+    func applyCurrentPreferences() {
+        Task {
+            let prefs = await Preferences.shared.screensaverPreferences()
+            startMonitoring(configuration: ScreenSaverConfiguration(prefs))
+        }
     }
 
     func updateConfiguration(_ newConfiguration: ScreenSaverConfiguration) {
@@ -58,21 +87,22 @@ final class ScreenSaverManager: NSObject {
         }
     }
 
-    private func attachGestureRecognizers(to window: UIWindow) {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(userInteracted))
-        tap.cancelsTouchesInView = false
-        tap.delaysTouchesEnded = false
-        tap.delegate = self
-        window.addGestureRecognizer(tap)
+    /// Resets the idle timer on user touches, forwarded from `ActivityTrackingApplication`.
+    func noteUserActivity() {
+        guard configuration.isEnabled else { return }
 
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(userInteracted))
-        pan.cancelsTouchesInView = false
-        pan.delegate = self
-        window.addGestureRecognizer(pan)
-    }
+        if overlayWindow != nil {
+            dismissSaverIfNeeded()
+            resetIdleTimer()
+            lastActivity = Date()
+            return
+        }
 
-    @objc private func userInteracted() {
-        dismissSaverIfNeeded()
+        // Throttle: continuous gestures fire many touches per second.
+        if let last = lastActivity, Date().timeIntervalSince(last) < 1.0 {
+            return
+        }
+        lastActivity = Date()
         resetIdleTimer()
     }
 
@@ -101,7 +131,10 @@ final class ScreenSaverManager: NSObject {
             overlay = UIWindow(windowScene: scene)
             overlay.frame = scene.coordinateSpace.bounds
         } else {
-            overlay = UIWindow(frame: UIScreen.main.bounds)
+            let fallbackScene = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .first
+            overlay = UIWindow(frame: fallbackScene?.screen.bounds ?? .zero)
         }
         overlay.windowLevel = .alert + 1 // ensure above status bar
         overlay.backgroundColor = .clear
@@ -146,7 +179,7 @@ final class ScreenSaverManager: NSObject {
                 restoreBrightnessIfNeeded()
             } else {
                 let target = min(max(configuration.wakeBrightnessLevel, 0.0), 1.0)
-                UIScreen.main.brightness = target
+                screen?.brightness = target
             }
         }
         // Animate dismissal for the overlay window
@@ -161,16 +194,15 @@ final class ScreenSaverManager: NSObject {
 
     private func applyDimming() {
         guard configuration.enablesAutoDimming else { return }
-        previousBrightness = UIScreen.main.brightness
+        previousBrightness = screen?.brightness
         var target = configuration.dimLevel
         target = min(max(target, 0.0), 1.0)
-        UIScreen.main.brightness = target
+        screen?.brightness = target
     }
 
     private func restoreBrightnessIfNeeded() {
-        guard let original = previousBrightness else { return }
-        UIScreen.main.brightness = original
-        previousBrightness = nil
+        guard let original = previousBrightness.take() else { return }
+        screen?.brightness = original
     }
 
     /// This is used fo testing the screen saver in the Settings view (before settings are saved)
@@ -205,10 +237,4 @@ extension Notification.Name {
     static let disableScreenSaver = Notification.Name("disableScreenSaver")
     static let wakeScreenSaver = Notification.Name("wakeScreenSaver")
     static let activateScreenSaver = Notification.Name("activateScreenSaver")
-}
-
-extension ScreenSaverManager: UIGestureRecognizerDelegate {
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        true
-    }
 }

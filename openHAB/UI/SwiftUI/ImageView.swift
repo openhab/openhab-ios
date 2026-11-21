@@ -9,7 +9,6 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import CommonUI
 import Kingfisher
 import OpenHABCore
@@ -21,9 +20,8 @@ import SwiftUI
 struct ImageView: View {
     let url: String
 
-    @EnvironmentObject var networkTracker: MainActorNetworkTracker
+    var networkTracker = MainActorNetworkTracker.shared
 
-    @ViewBuilder
     var body: some View {
         if !url.isEmpty {
             switch url {

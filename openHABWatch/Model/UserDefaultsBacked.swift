@@ -15,7 +15,7 @@ import Foundation
 struct UserDefaultsBacked<T> {
     let key: String
     let defaultValue: T
-    // https://www.swiftbysundell.com/articles/property-wrappers-in-swift/
+    /// https://www.swiftbysundell.com/articles/property-wrappers-in-swift/
     var storage: UserDefaults = .standard
 
     var wrappedValue: T {
@@ -28,7 +28,7 @@ struct UserDefaultsBacked<T> {
     }
 }
 
-// Convenience initializer when UserDefaults is optional.
+/// Convenience initializer when UserDefaults is optional.
 extension UserDefaultsBacked where T: ExpressibleByNilLiteral {
     init(key: String, storage: UserDefaults = .standard) {
         self.init(key: key, defaultValue: nil, storage: storage)
