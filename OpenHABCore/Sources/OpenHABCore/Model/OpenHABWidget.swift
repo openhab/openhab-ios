@@ -9,9 +9,9 @@
 //
 // SPDX-License-Identifier: EPL-2.0
 
-import Combine
 import Foundation
 @_exported import MapKit
+import Observation
 import os.log
 
 public enum SitemapWidgetEventApplicationResult: Equatable, Sendable {
@@ -21,7 +21,8 @@ public enum SitemapWidgetEventApplicationResult: Equatable, Sendable {
     case requiresPageReload
 }
 
-public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObject {
+@Observable
+public class OpenHABWidget: NSObject, MKAnnotation, Identifiable {
     public enum WidgetType: String, Decodable, Sendable {
         case chart = "Chart"
         case colorpicker = "Colorpicker"
@@ -74,10 +75,11 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
 
     public var id = ""
 
-    public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
+    // Set again on every page refresh and only called from actions, never read by views.
+    @ObservationIgnored public var sendCommand: ((_ item: OpenHABItem, _ command: String?) -> Void)?
     public var widgetId = ""
-    @Published public var label = ""
-    @Published public var icon = ""
+    public var label = ""
+    public var icon = ""
 
     public var type: WidgetType = .unknown
     public var url = ""
@@ -88,24 +90,24 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var refresh = 0
     public var height: Double?
     public var isLeaf = false
-    @Published public var iconColor = ""
-    @Published public var labelcolor = ""
-    @Published public var valuecolor = ""
+    public var iconColor = ""
+    public var labelcolor = ""
+    public var valuecolor = ""
     public var service = ""
-    @Published public var state = ""
+    public var state = ""
     public var text = ""
     public var legend: Bool?
     public var inputHint = InputHint.unknown
     public var encoding = ""
     public var forceAsItem: Bool?
-    @Published public var item: OpenHABItem?
+    public var item: OpenHABItem?
     public var linkedPage: OpenHABPage?
     public var mappings: [OpenHABWidgetMapping] = []
     public var widgets: [OpenHABWidget] = []
     public var visibility = true
     public var unit: String?
     public var pattern: String?
-    @Published public var staticIcon: Bool?
+    public var staticIcon: Bool?
     public var switchSupport = false
     public var labelSource = LabelSource.unknown
     public var releaseOnly: Bool?
@@ -115,6 +117,8 @@ public class OpenHABWidget: NSObject, MKAnnotation, Identifiable, ObservableObje
     public var command: String?
     public var stateless: Bool?
     public var yAxisDecimalPattern: String?
+    /// The frame or group this widget is nested in, set by `flatten`.
+    @ObservationIgnored public var parentWidgetId: String?
 
     public var widgetType: WidgetType {
         type
@@ -233,17 +237,6 @@ public extension OpenHABWidget {
     convenience init(icon: String, iconColor: String? = nil) {
         // swiftlint:disable:next line_length
         self.init(widgetId: "\(UUID())", label: "", icon: icon, type: .unknown, url: nil, period: nil, minValue: nil, maxValue: nil, step: nil, refresh: nil, height: nil, isLeaf: nil, iconColor: iconColor, labelColor: nil, valueColor: nil, service: nil, state: nil, text: nil, legend: nil, inputHint: nil, encoding: nil, item: nil, linkedPage: nil, mappings: [], widgets: [], visibility: nil, switchSupport: nil, forceAsItem: nil, labelSource: .unknown, releaseOnly: nil)
-    }
-}
-
-/// Associated-object key for parentWidgetId — avoids changing OpenHABWidget's stored-property
-/// layout, which would corrupt Combine's @Published field scan under concurrent test execution.
-private nonisolated(unsafe) var parentWidgetIdKey: UInt8 = 0
-
-public extension OpenHABWidget {
-    var parentWidgetId: String? {
-        get { objc_getAssociatedObject(self, &parentWidgetIdKey) as? String }
-        set { objc_setAssociatedObject(self, &parentWidgetIdKey, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC) }
     }
 }
 
