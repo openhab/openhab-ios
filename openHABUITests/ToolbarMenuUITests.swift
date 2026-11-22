@@ -46,6 +46,45 @@ final class ToolbarMenuUITests: XCTestCase {
         XCTAssertTrue(sitemapsHeader.isHittable, "Sitemaps header should be interactable once the menu has loaded")
     }
 
+    /// The menu opens from its button while the home is still loading, so the user can switch to
+    /// another home or page when loading is slow or stuck.
+    func testMenuOpensWhileTheHomeIsLoading() {
+        app.launchEnvironment["UITestOpenMenu"] = nil
+        app.launch()
+
+        let menuButton = app.buttons["HamburgerButton"]
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 5), "The menu button should show while loading")
+        XCTAssertTrue(menuButton.isHittable, "The menu button should be tappable while loading")
+        menuButton.tap()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "The menu should open while the home is loading")
+    }
+
+    /// The menu opens again after the user picked a home in it, which swaps the screen behind the
+    /// menu button while the menu closes.
+    func testMenuReopensAfterPickingAHome() {
+        app.launch()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
+        let homesHeader = app.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] 'Homes'")).firstMatch
+        XCTAssertTrue(homesHeader.waitForExistence(timeout: 20), "Homes header should be present")
+        homesHeader.tap()
+
+        // The home rows are static texts of their own; the header's label is inside its button.
+        let homeRow = app.staticTexts.matching(NSPredicate(format: "label == 'Home#1'")).allElementsBoundByIndex
+            .first { $0.isHittable && !homesHeader.frame.contains($0.frame) }
+        XCTAssertNotNil(homeRow, "The home list should show the home")
+        homeRow?.tap()
+
+        let closed = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: appSettingsRow)
+        wait(for: [closed], timeout: 5)
+
+        let menuButton = app.buttons["HamburgerButton"]
+        XCTAssertTrue(menuButton.waitForExistence(timeout: 5), "The menu button should be back")
+        menuButton.tap()
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "The menu should open again after the home switch")
+    }
+
     /// A tap outside the popover closes it.
     func testTapOutsideClosesTheMenu() {
         app.launch()
@@ -98,6 +137,28 @@ final class ToolbarMenuUITests: XCTestCase {
         XCTAssertTrue(appSettingsRow.exists, "A pull down should not close the menu")
     }
 
+    /// Home Settings offers App Settings while it has no unsaved changes. The row's colour cannot
+    /// be read here; it used to draw greyed out although it worked.
+    func testHomeSettingsOpensAppSettings() {
+        app.launch()
+
+        let homeSettingsButton = app.buttons["gear"]
+        XCTAssertTrue(homeSettingsButton.waitForExistence(timeout: 5), "The menu should offer the home's settings")
+        homeSettingsButton.tap()
+
+        XCTAssertTrue(app.navigationBars["Home Settings"].waitForExistence(timeout: 5), "Home Settings should open")
+        // The row is at the bottom of the form, which only creates the rows on screen.
+        let appSettings = app.buttons["HomeSettingsAppSettings"]
+        for _ in 0 ..< 10 where !(appSettings.exists && appSettings.isHittable) {
+            app.collectionViews.firstMatch.swipeUp()
+        }
+        XCTAssertTrue(appSettings.isHittable, "Home Settings should offer App Settings")
+        XCTAssertTrue(appSettings.isEnabled, "Without unsaved changes App Settings is available")
+        appSettings.tap()
+
+        XCTAssertTrue(app.navigationBars["App Settings"].waitForExistence(timeout: 5), "App Settings should open")
+    }
+
     /// "Add Home" opens the New Home alert. With several homes it sits behind "Edit".
     /// Which button shows for a given home count is covered by HomePickerActionTests.
     func testAddHomeOpensNewHomeAlert() {
@@ -132,5 +193,26 @@ final class ToolbarMenuUITests: XCTestCase {
         if wasCollapsed {
             homesHeader.tap()
         }
+    }
+
+    /// App Settings › Logs shows the log, with its header first, and offers it for sharing.
+    /// The log is read off the main thread, so the screen stays usable while it loads.
+    func testLogsShowAndCanBeShared() {
+        app.launch()
+
+        XCTAssertTrue(appSettingsRow.waitForExistence(timeout: 5), "Menu should open via UITestOpenMenu")
+        appSettingsRow.tap()
+
+        let logsRow = app.buttons["Logs"]
+        let settingsList = app.collectionViews.firstMatch
+        for _ in 0 ..< 6 where !logsRow.isHittable {
+            settingsList.swipeUp()
+        }
+        XCTAssertTrue(logsRow.waitForExistence(timeout: 5), "App Settings should list Logs")
+        logsRow.tap()
+
+        let header = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'openHAB iOS'")).firstMatch
+        XCTAssertTrue(header.waitForExistence(timeout: 30), "The log should start with its header")
+        XCTAssertTrue(app.buttons["Share Logs"].waitForExistence(timeout: 5), "A loaded log should be offered for sharing")
     }
 }

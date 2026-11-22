@@ -283,7 +283,10 @@ class OpenHABWebViewModel: ObservableObject {
 
         let isCloudConnection = activeConfig.isCloudConnection
         let homeId = currentPrefs.id
+        let isNewWebView = views[homeId] == nil
         let newWebview = getOrCreateWebView(for: homeId, isCloudConnection: isCloudConnection)
+        let webViewLine = WebViewLoadTiming.webViewLogLine(isNew: isNewWebView, isSwitch: newWebview !== webView)
+        Logger.webViewLoad.notice("Main UI load: \(webViewLine, privacy: .public)")
         // The home is known now, so the sign-in can be looked up for it.
         refreshAuthTracking()
         if newWebview !== webView {
@@ -298,6 +301,7 @@ class OpenHABWebViewModel: ObservableObject {
         self.basePath = basePath
         installUserScripts(on: webView, restore: restore?.history, props: restore?.props, basePath: basePath)
 
+        Logger.webViewLoad.notice("Main UI load: \(WebRouteRestore.logDescription(restore: restore, path: path, defaultPath: defaultPath), privacy: .public)")
         Logger.viewController.info("Loading URL: \(modifiedUrl)")
         // Local avoids `self.` inside the Logger interpolation, which redundantSelf would strip.
         let webViewID = ObjectIdentifier(webView).debugDescription
@@ -623,6 +627,10 @@ private extension OpenHABWebViewModel {
     func installUserScripts(on webView: WKWebView, restore: [String]?, props: [String]? = nil, basePath: String = "") {
         let controller = webView.configuration.userContentController
         controller.removeAllUserScripts()
+        // First, so the shim can add its own marks.
+        controller.addUserScript(
+            WKUserScript(source: WebViewLoadTiming.script, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        )
         bridge.installScripts(on: controller, restore: restore, props: props, basePath: basePath, layout: currentLayout())
         controller.addUserScript(
             WKUserScript(source: webViewExternalURLInterceptorJS, injectionTime: .atDocumentStart, forMainFrameOnly: true)

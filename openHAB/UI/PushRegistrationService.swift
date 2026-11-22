@@ -81,6 +81,18 @@ final class PushRegistrationService {
         subscribeToOpenhabConnectionChanges()
     }
 
+    /// The connection to register a home's notifications with: its notification connection,
+    /// unless that has no username or password. my.openHAB rejects a registration without them,
+    /// and every retry, on each change to the stored homes, would be rejected again.
+    nonisolated static func registrationConnection(of connections: [ConnectionConfiguration?], home: UUID) -> ConnectionConfiguration? {
+        guard let connection = Preferences.getNotificationConnection(of: connections) else { return nil }
+        guard connection.hasCredentials else {
+            Logger.viewController.info("Not registering notifications for home \(home, privacy: .public): its notification connection has no username or password")
+            return nil
+        }
+        return connection
+    }
+
     // MARK: - APS Registration
 
     private func handleApsRegistration(deviceToken: String?, deviceId: String?, deviceName: String?) {
@@ -120,7 +132,7 @@ final class PushRegistrationService {
             // The persisted record carries no credentials, they live in the Keychain. Using it
             // raw authenticates against the cloud with an empty username and password.
             guard let homeConfig = await Preferences.shared.storedHomeWithCredentials(forId: uuid),
-                  let connection = Preferences.getNotificationConnection(of: homeConfig) else { continue }
+                  let connection = Self.registrationConnection(of: homeConfig.trackedConnections, home: uuid) else { continue }
             currentConnections.insert(UuidWithConnection(uuid: uuid, connection: connection))
         }
         guard !Task.isCancelled else { return }
