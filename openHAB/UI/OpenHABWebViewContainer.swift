@@ -42,7 +42,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         /// The page's message handlers. `externalURL` stays outside the bridge: it is an iOS
         /// workaround for taps on custom-scheme links, not part of the protocol.
         private static var handlerNames: [String] {
-            var names = [OHBridge.messageHandlerName, "externalURL"]
+            var names = [OHBridge.messageHandlerName, "externalURL", WebViewLoadTiming.messageHandlerName]
             #if DEBUG
             names.append("ohUITest")
             #endif
@@ -105,14 +105,24 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
         // MARK: - WKScriptMessageHandler
 
-        nonisolated func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            Task { @MainActor in
-                self.handleScriptMessage(message)
-            }
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            handleScriptMessage(message)
         }
 
         private func handleScriptMessage(_ message: WKScriptMessage) {
-            Logger.viewController.info("WKScriptMessage \(message.name)")
+            if message.name == WebViewLoadTiming.messageHandlerName {
+                // Only the page Main UI runs in; an iframe's requests say nothing about it.
+                guard message.frameInfo.isMainFrame,
+                      let event = WebViewLoadTimingEvent(body: message.body) else { return }
+                // Notice, not info: iOS drops info entries within a minute or so, long before
+                // a user exports the log for a slow start.
+                Logger.webViewLoad.notice("Main UI load: \(event.logLine, privacy: .public)")
+                return
+            }
+            // The bridge logs the type of each of its messages itself.
+            if message.name != OHBridge.messageHandlerName {
+                Logger.viewController.info("WKScriptMessage \(message.name, privacy: .public)")
+            }
             if message.name == "externalURL",
                let urlString = message.body as? String,
                let url = URL(string: urlString),
@@ -144,6 +154,9 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
             guard let url = navigationAction.request.url else { return .allow }
             Logger.viewController.info("decidePolicyFor - url: \(url.absoluteString)")
+            if navigationAction.targetFrame?.isMainFrame == true {
+                logNavigation("requested", url: url)
+            }
             if !url.isNativeWebURL {
                 // JS-triggered custom-scheme navigations (e.g. window.location = 'shortcuts://...')
                 // arrive here; anchor taps are caught by the injected JS handler first.
@@ -196,6 +209,9 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
         func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
             if let response = navigationResponse.response as? HTTPURLResponse {
                 Logger.viewController.info("navigationResponse: \(response.statusCode)")
+                if navigationResponse.isForMainFrame {
+                    logNavigation("response \(response.statusCode)", url: response.url)
+                }
                 if response.statusCode >= 400 {
                     viewModel.isLoading = true
                     return .cancel
@@ -206,16 +222,19 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation?) {
             Logger.viewController.info("didStartProvisionalNavigation - webView.url: \(String(describing: webView.url?.description))")
+            logNavigation("started", url: webView.url)
             viewModel.isLoading = true
             viewModel.handleNavigationStart()
         }
 
         func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+            logNavigation("committed", url: webView.url)
             viewModel.bridge.recordCommit(navigation, url: webView.url)
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation?, withError error: any Error) {
             Logger.viewController.error("didFail - webView.url: \(String(describing: webView.url?.description))")
+            logNavigation(WebViewLoadTiming.failureStep(error), url: webView.url)
             if let urlError = error as? URLError, urlError.code == .cancelled {
                 return
             }
@@ -224,6 +243,7 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             Logger.viewController.info("didFinish - webView.url: \(String(describing: webView.url?.description))")
+            logNavigation("finished", url: webView.url)
             viewModel.handleDidFinish()
         }
 
@@ -248,11 +268,18 @@ struct OpenHABWebViewContainer: UIViewControllerRepresentable {
 
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
             Logger.viewController.warning("webViewWebContentProcessDidTerminate - reloading view")
+            logNavigation("stopped (web content process ended)", url: webView.url)
             viewModel.reloadView()
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+            logNavigation(WebViewLoadTiming.failureStep(error), url: webView.url)
             viewModel.reloadView()
+        }
+
+        /// Notice, like the page's marks, so the steps are still there when the user exports the log.
+        private func logNavigation(_ step: String, url: URL?) {
+            Logger.webViewLoad.notice("Main UI load: \(WebViewLoadTiming.navigationLogLine(step, url: url), privacy: .public)")
         }
 
         // MARK: - WKUIDelegate

@@ -52,8 +52,7 @@ final class IconReloadCoordinator: ObservableObject {
     }
 
     func didBecomeActive(now: Date = Date()) {
-        guard let backgroundedAt else { return }
-        self.backgroundedAt = nil
+        guard let backgroundedAt = backgroundedAt.take() else { return }
         if now.timeIntervalSince(backgroundedAt) >= Self.reloadThreshold {
             reloadEpoch += 1
         }

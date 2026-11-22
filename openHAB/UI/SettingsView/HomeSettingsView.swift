@@ -165,9 +165,20 @@ struct HomeSettingsView: View, SettingsSheetView {
                 Button {
                     showAppSettings = true
                 } label: {
-                    NavigationLink("App Settings", destination: EmptyView())
+                    // Not a NavigationLink as the label: one that is not the control itself
+                    // draws greyed out, as if disabled.
+                    HStack {
+                        Text("App Settings")
+                        Spacer()
+                        Image(systemSymbol: .chevronRight)
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .contentShape(.rect)
                 }
-                .foregroundStyle(isDirty ? Color.secondary : Color(uiColor: .label))
+                .accessibilityIdentifier("HomeSettingsAppSettings")
+                // Greyed out only while this home has unsaved changes.
+                .foregroundStyle(isDirty ? Color.secondary : Color.primary)
                 .disabled(isDirty)
             }
         }

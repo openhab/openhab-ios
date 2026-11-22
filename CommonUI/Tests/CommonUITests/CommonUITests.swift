@@ -10,10 +10,28 @@
 // SPDX-License-Identifier: EPL-2.0
 
 @testable import CommonUI
+import Foundation
 import Numerics
 import Testing
 
 struct CommonUITests {
+    /// 2026-11-04 16:30:54.250 UTC
+    private static let sample = Date(timeIntervalSince1970: 1_793_809_854.25)
+
+    @Test func logTimestampIsLocalISO8601WithMilliseconds() throws {
+        var style = Date.ISO8601FormatStyle.logTimestamp
+        style.timeZone = try #require(TimeZone(identifier: "Europe/Berlin"))
+        #expect(Self.sample.formatted(style) == "2026-11-04T17:30:54.250+01:00")
+        style.timeZone = .gmt
+        #expect(Self.sample.formatted(style) == "2026-11-04T16:30:54.250Z")
+    }
+
+    @Test("The Logs screen shows one more dot each step, up to five, then starts again")
+    func loadingDots() {
+        let dots = [0, 0.2, 0.6, 1.0, 1.4, 1.8, 2.2, 2.6, 4.2].map { LogsViewer.loadingDots(after: $0) }
+        #expect(dots == [".", ".", "..", "...", "....", ".....", ".", "..", "."])
+    }
+
     @Test func lowKelvinValue() {
         let color = componentsForColorTemperature(temperature: 1000)
         #expect(color.r.isApproximatelyEqual(to: 1.0, relativeTolerance: 0.01))
