@@ -15,6 +15,9 @@ import os.log
 @MainActor
 public final class WidgetCommandDispatcher {
     private var pendingTasks: [String: Task<Void, Never>] = [:]
+    private var throttledCommands: [String: String] = [:]
+    private var throttledSentCommands: [String: String] = [:]
+    private var throttledExecutors: [String: @MainActor (String) -> Void] = [:]
 
     public init() {}
 
@@ -42,6 +45,16 @@ public final class WidgetCommandDispatcher {
                 key: key,
                 fallbackItem: fallbackItem
             )
+        case let .throttle(duration):
+            let taskKey = commandKey(for: widget, key: key)
+            guard phase != .release else {
+                cancelPendingTask(for: taskKey)
+                dispatch(command: command, for: widget, fallbackItem: fallbackItem)
+                return
+            }
+            sendThrottled(command, taskKey: taskKey, duration: duration) { [weak self] latest in
+                self?.dispatch(command: latest, for: widget, fallbackItem: fallbackItem)
+            }
         case .finalOnly:
             guard phase == .release else { return }
             dispatch(command: command, for: widget, fallbackItem: fallbackItem)
@@ -75,6 +88,16 @@ public final class WidgetCommandDispatcher {
                 key: key,
                 execute: execute
             )
+        case let .throttle(duration):
+            let taskKey = commandKey(for: itemname, key: key)
+            guard phase != .release else {
+                cancelPendingTask(for: taskKey)
+                execute(itemname, command)
+                return
+            }
+            sendThrottled(command, taskKey: taskKey, duration: duration) { latest in
+                execute(itemname, latest)
+            }
         case .finalOnly:
             guard phase == .release else { return }
             execute(itemname, command)
@@ -108,6 +131,17 @@ public final class WidgetCommandDispatcher {
                 key: key,
                 execute: execute
             )
+        case let .throttle(duration):
+            let taskKey = commandKey(for: item, key: key)
+            guard phase != .release else {
+                cancelPendingTask(for: taskKey)
+                execute(item.name, command)
+                return
+            }
+            let itemName = item.name
+            sendThrottled(command, taskKey: taskKey, duration: duration) { latest in
+                execute(itemName, latest)
+            }
         case .finalOnly:
             guard phase == .release else { return }
             execute(item.name, command)
@@ -143,23 +177,17 @@ public final class WidgetCommandDispatcher {
 
     @MainActor
     public func cancelPending(for widget: OpenHABWidget, key: String? = nil) {
-        let taskKey = commandKey(for: widget, key: key)
-        pendingTasks[taskKey]?.cancel()
-        pendingTasks.removeValue(forKey: taskKey)
+        cancelPendingTask(for: commandKey(for: widget, key: key))
     }
 
     @MainActor
     public func cancelPending(for item: OpenHABItem, key: String? = nil) {
-        let taskKey = commandKey(for: item, key: key)
-        pendingTasks[taskKey]?.cancel()
-        pendingTasks.removeValue(forKey: taskKey)
+        cancelPendingTask(for: commandKey(for: item, key: key))
     }
 
     @MainActor
     public func cancelPending(for itemname: String, key: String? = nil) {
-        let taskKey = commandKey(for: itemname, key: key)
-        pendingTasks[taskKey]?.cancel()
-        pendingTasks.removeValue(forKey: taskKey)
+        cancelPendingTask(for: commandKey(for: itemname, key: key))
     }
 
     @MainActor
@@ -242,6 +270,42 @@ public final class WidgetCommandDispatcher {
             return "\(itemname)-\(key)"
         }
         return itemname
+    }
+
+    private func sendThrottled(_ command: String,
+                               taskKey: String,
+                               duration: Duration,
+                               execute: @escaping @MainActor (String) -> Void) {
+        throttledCommands[taskKey] = command
+        throttledExecutors[taskKey] = execute
+        guard pendingTasks[taskKey] == nil else { return }
+        flushThrottled(taskKey: taskKey, duration: duration)
+    }
+
+    /// Sends the newest command, then waits. On wake, sends again if a newer value arrived.
+    private func flushThrottled(taskKey: String, duration: Duration) {
+        guard let latest = throttledCommands[taskKey],
+              let execute = throttledExecutors[taskKey] else { return }
+        if latest == throttledSentCommands[taskKey] {
+            cancelPendingTask(for: taskKey)
+            return
+        }
+        throttledSentCommands[taskKey] = latest
+        pendingTasks[taskKey]?.cancel()
+        pendingTasks[taskKey] = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: duration)
+            guard !Task.isCancelled else { return }
+            self?.flushThrottled(taskKey: taskKey, duration: duration)
+        }
+        execute(latest)
+    }
+
+    private func cancelPendingTask(for taskKey: String) {
+        pendingTasks[taskKey]?.cancel()
+        pendingTasks.removeValue(forKey: taskKey)
+        throttledCommands.removeValue(forKey: taskKey)
+        throttledSentCommands.removeValue(forKey: taskKey)
+        throttledExecutors.removeValue(forKey: taskKey)
     }
 
     deinit {

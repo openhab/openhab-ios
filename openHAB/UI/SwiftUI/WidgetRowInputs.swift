@@ -530,6 +530,10 @@ struct SliderRowInput: Equatable, RowWithIconInput {
     let labelColor: String
     let valueColor: String
     let shouldSendUpdatesDuringMove: Bool
+    /// When true, `shouldSendUpdatesDuringMove` is only the item-type default and the
+    /// Real-time Sliders preference still has to allow the updates. Sitemap `releaseOnly`
+    /// sets this to false because that attribute already decided.
+    let liveUpdatesFollowPreference: Bool
     let serverValue: Double
     let icon: RowIconInput
     let itemName: String?
@@ -578,6 +582,7 @@ struct SliderRowInput: Equatable, RowWithIconInput {
             labelColor: widget.labelcolor,
             valueColor: widget.valuecolor,
             shouldSendUpdatesDuringMove: widget.shouldUseSliderUpdatesDuringMove(),
+            liveUpdatesFollowPreference: widget.releaseOnly == nil,
             serverValue: adjustedToStep(serverValue, displayState: displayState),
             icon: RowIconInput.from(widget: widget),
             itemName: widget.item?.name
@@ -625,5 +630,12 @@ struct SliderRowInput: Equatable, RowWithIconInput {
         var adjusted = floor((clamped - displayState.minValue) / displayState.step) * displayState.step
         adjusted += displayState.minValue
         return adjusted.clamped(to: range)
+    }
+
+    func sendsUpdatesDuringMove(realTimeSliders: Bool) -> Bool {
+        if liveUpdatesFollowPreference {
+            return realTimeSliders && shouldSendUpdatesDuringMove
+        }
+        return shouldSendUpdatesDuringMove
     }
 }

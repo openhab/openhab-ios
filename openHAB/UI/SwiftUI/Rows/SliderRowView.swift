@@ -18,6 +18,7 @@ private struct SliderRowConfig {
     let input: SliderRowInput
     let widgetVersion: Int
     let overrideValue: Double?
+    let realTimeSliders: Bool
     let fallbackSymbol: SFSymbol?
     let viewModel: SitemapPageViewModel
 }
@@ -28,6 +29,7 @@ private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent
         input: config.input,
         widgetVersion: config.widgetVersion,
         overrideValue: config.overrideValue,
+        realTimeSliders: config.realTimeSliders,
         fallbackSymbol: config.fallbackSymbol,
         onToggleSwitch: { command in
             guard let itemName = config.input.itemName else { return }
@@ -39,7 +41,11 @@ private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent
         },
         onSendValue: { value, policy, phase, key in
             guard let itemName = config.input.itemName else { return }
-            config.viewModel.setSliderOverrideValue(value, for: itemName)
+            // Publishing an override on a live update refreshes this row while the
+            // finger is still down, and the slider then stops tracking.
+            if phase == .release {
+                config.viewModel.setSliderOverrideValue(value, for: itemName)
+            }
             let numberState = NumberState(
                 value: value,
                 unit: config.input.unit,
@@ -50,23 +56,32 @@ private func makeSliderRowContent(_ config: SliderRowConfig) -> SliderRowContent
     )
 }
 
+/// Confirmation delay for a real-time slider. The wait is not UI work, so it leaves the main actor.
+/// `SliderRowContent`'s `.task` returns to the main actor before committing, and cancels this wait
+/// when the row disappears or a newer gesture replaces it.
+@concurrent
+private func waitForSliderLiftConfirmation() async throws {
+    try await Task.sleep(for: .seconds(SliderDragCoordinator.liftConfirmationDelay))
+}
+
 private struct SliderRowContent: View {
     let input: SliderRowInput
     let widgetVersion: Int
     let overrideValue: Double?
+    let realTimeSliders: Bool
     let fallbackSymbol: SFSymbol?
     let onToggleSwitch: (String) -> Void
     let onCancelPending: (String?) -> Void
     let onSendValue: (Double, WidgetCommandPolicy, WidgetCommandPhase, String?) -> Void
 
-    /// Ephemeral local drag value. Server state remains authoritative outside active drag.
-    @State private var dragValue: Double?
-    @State private var isEditing = false
+    /// Finger contact and the values accepted during it. Server state stays authoritative afterwards.
+    @State private var coordinator = SliderDragCoordinator()
     @State private var dragStartVersion: Int?
     @State private var dragWidgetId: String?
+    @State private var liftToken: UUID?
 
     var body: some View {
-        let displayedSliderValue = effectiveValue(state: input)
+        let displayedSliderValue = displayedValue(state: input)
         HStack {
             if input.switchSupport {
                 Button {
@@ -81,47 +96,49 @@ private struct SliderRowContent: View {
             }
 
             Slider(value: sliderBinding(state: input), in: input.sliderRange, step: input.safeStep) { editing in
-                isEditing = editing
-                if editing {
-                    dragWidgetId = input.widgetId
-                    dragStartVersion = widgetVersion
-                    dragValue = displayedSliderValue
-                    return
-                }
-
-                // Always send the final value on release
-                onCancelPending(input.sliderCommandKey)
-                onSendValue(
-                    displayedSliderValue,
-                    .finalOnly,
-                    .release,
-                    input.sliderCommandKey
-                )
-                dragValue = nil
-                dragStartVersion = nil
-                dragWidgetId = nil
+                perform({ session in
+                    session.editingChanged(editing, displayedValue: displayedSliderValue, now: Date())
+                }, state: input)
             }
             .disabled(input.readOnly)
+            // The Slider's own editing callback is unbalanced on iOS 26+ when `step` is set.
+            // A simultaneous drag records real finger contact so a late callback cannot send again.
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        perform({ session in
+                            session.fingerChanged(displayedValue: displayedSliderValue)
+                        }, state: input)
+                    }
+                    .onEnded { _ in
+                        scheduleLiftConfirmation()
+                    }
+            )
         }
         .onAppear {
-            isEditing = false
-            dragValue = nil
-            dragStartVersion = nil
-            dragWidgetId = nil
+            resetDragTracking()
+        }
+        .task(id: liftToken) {
+            await confirmPendingLift()
         }
         .onChange(of: input.widgetId) {
-            isEditing = false
-            dragValue = nil
-            dragStartVersion = nil
-            dragWidgetId = nil
+            resetDragTracking()
         }
         .onChange(of: widgetVersion) {
-            guard isEditing else { return }
+            guard coordinator.isDragging else { return }
+            if coordinator.fingerIsDown || coordinator.pendingLift {
+                // The finger still owns the thumb. A realtime command goes out on an interval
+                // while the thumb moves, and the server echo of that command arrives while the
+                // finger is down. Treating it as an outside change cancels the drag.
+                if dragWidgetId == input.widgetId {
+                    dragStartVersion = widgetVersion
+                }
+                return
+            }
             // If server refresh advanced while dragging, only cancel when the server value diverges
             // meaningfully from the local drag value. This avoids jarring cancels on polling echoes.
             guard dragWidgetId == input.widgetId, let dragStartVersion else {
-                isEditing = false
-                dragValue = nil
+                coordinator.cancel(now: Date())
                 dragStartVersion = nil
                 dragWidgetId = nil
                 return
@@ -129,11 +146,10 @@ private struct SliderRowContent: View {
 
             if widgetVersion != dragStartVersion {
                 let threshold = max(input.step, 0.001)
-                let currentDragValue = dragValue ?? input.serverValue
+                let currentDragValue = coordinator.dragValue ?? input.serverValue
                 let hasMeaningfulServerChange = abs(input.serverValue - currentDragValue) > threshold
                 if hasMeaningfulServerChange {
-                    isEditing = false
-                    dragValue = nil
+                    coordinator.cancel(now: Date())
                     self.dragStartVersion = nil
                     dragWidgetId = nil
                 } else {
@@ -144,10 +160,92 @@ private struct SliderRowContent: View {
         }
     }
 
+    private func resetDragTracking() {
+        coordinator.reset()
+        dragStartVersion = nil
+        dragWidgetId = nil
+        liftToken = nil
+    }
+
+    /// DragGesture can report the finger lifting when a live update refreshes the row.
+    /// Confirm the lift only if the thumb does not move again within the confirmation window.
+    /// Release-only drags publish nothing until the finger lifts, so that refresh does not
+    /// happen and the slider's own release animation must not cancel the only command.
+    private func scheduleLiftConfirmation() {
+        perform({ session in
+            _ = session.fingerMayHaveLifted(now: Date())
+            return []
+        }, state: input)
+        guard coordinator.pendingLift else { return }
+
+        let sendsDuringMove = input.sendsUpdatesDuringMove(realTimeSliders: realTimeSliders)
+        if !sendsDuringMove {
+            liftToken = nil
+            perform({ session in
+                session.commitPendingLift(
+                    displayedValue: displayedValue(state: input),
+                    now: Date()
+                )
+            }, state: input)
+            return
+        }
+
+        // Replacing the token cancels the previous wait. `.task(id:)` starts the new one.
+        liftToken = UUID()
+    }
+
+    private func confirmPendingLift() async {
+        guard let token = liftToken else { return }
+        do {
+            try await waitForSliderLiftConfirmation()
+        } catch {
+            return
+        }
+        guard !Task.isCancelled, liftToken == token, coordinator.pendingLift else { return }
+        perform({ session in
+            session.commitPendingLift(
+                displayedValue: displayedValue(state: input),
+                now: Date()
+            )
+        }, state: input)
+    }
+
+    private func perform(_ update: (inout SliderDragCoordinator) -> [SliderDragCoordinator.Action],
+                         state: SliderRowInput) {
+        var session = coordinator
+        let actions = update(&session)
+        // The post-release burst calls this on every animation frame without changing
+        // the session. Writing that copy back refreshes the row and fights the thumb.
+        if coordinator != session {
+            coordinator = session
+        }
+        if coordinator.isDragging, dragWidgetId == nil {
+            dragWidgetId = state.widgetId
+            dragStartVersion = widgetVersion
+        }
+        let sendsDuringMove = state.sendsUpdatesDuringMove(realTimeSliders: realTimeSliders)
+        for action in actions {
+            switch action {
+            case let .change(value):
+                guard sendsDuringMove else { continue }
+                onSendValue(value, WidgetCommandDefaults.realtimeSlider, .change, state.sliderCommandKey)
+            case let .release(value):
+                onCancelPending(state.sliderCommandKey)
+                onSendValue(value, .finalOnly, .release, state.sliderCommandKey)
+                dragStartVersion = nil
+                dragWidgetId = nil
+            }
+        }
+        // The thumb moved again, or the lift was committed. Drop the wait so it cannot send later.
+        if liftToken != nil, !coordinator.pendingLift {
+            liftToken = nil
+        }
+    }
+
     @ViewBuilder
     private func labelContent(state: SliderRowInput) -> some View {
-        let displayedValue = effectiveValue(state: state)
-        let currentValueText = currentValueText(state: state, value: displayedValue)
+        let shownValue = displayedValue(state: state)
+        let currentValueText = currentValueText(state: state, value: shownValue)
         RowViewWithIcon(input: state, fallbackSymbol: fallbackSymbol) {
             if !state.displayState.labelText.isEmpty {
                 let labelText = state.displayState.labelText
@@ -159,7 +257,7 @@ private struct SliderRowContent: View {
             Spacer()
 
             // Show local value while dragging, otherwise use the server label value.
-            Text(isEditing ? currentValueText : (state.displayState.labelValue ?? currentValueText))
+            Text(coordinator.isDragging ? currentValueText : (state.displayState.labelValue ?? currentValueText))
                 .ohTextToken(.rowValueCallout)
                 .monospacedDigit()
                 .foregroundStyle(state.valueColor.isEmpty ? Color(.secondaryLabel) : Color(fromString: state.valueColor))
@@ -169,26 +267,19 @@ private struct SliderRowContent: View {
 
     private func sliderBinding(state: SliderRowInput) -> Binding<Double> {
         Binding(
-            get: { effectiveValue(state: state) },
+            get: { displayedValue(state: state) },
             set: { newValue in
-                dragValue = newValue
-
-                // Send updates during drag if enabled (throttled)
-                if isEditing, state.shouldSendUpdatesDuringMove {
-                    onSendValue(
-                        newValue,
-                        WidgetCommandDefaults.slider,
-                        .change,
-                        state.sliderCommandKey
-                    )
-                }
+                let displayed = displayedValue(state: state)
+                perform({ session in
+                    session.valueChanged(newValue, displayedValue: displayed, step: state.step, now: Date())
+                }, state: state)
             }
         )
     }
 
-    private func effectiveValue(state: SliderRowInput) -> Double {
-        if isEditing {
-            return dragValue ?? state.serverValue
+    private func displayedValue(state: SliderRowInput) -> Double {
+        if coordinator.isDragging, let dragValue = coordinator.dragValue {
+            return dragValue
         }
         return overrideValue ?? state.serverValue
     }
@@ -220,6 +311,7 @@ struct SliderRowView: View {
                 input: input,
                 widgetVersion: viewModel.widgetUpdateVersion(for: input.widgetId),
                 overrideValue: viewModel.sliderOverrideValue(for: input.itemName),
+                realTimeSliders: viewModel.realTimeSliders,
                 fallbackSymbol: fallbackSymbol,
                 viewModel: viewModel
             )

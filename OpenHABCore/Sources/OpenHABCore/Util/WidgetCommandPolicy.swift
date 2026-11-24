@@ -12,7 +12,12 @@
 import Foundation
 
 public enum WidgetCommandDefaults {
+    /// Pause-to-send policy used by the watch slider and the color-temperature picker.
+    /// The sitemap slider sends live updates with ``realtimeSlider`` instead.
     public static let slider: WidgetCommandPolicy = .debounce(.milliseconds(500))
+    /// Real-time slider drags. The first value is sent immediately, then the latest
+    /// value is sent on this interval while the thumb keeps moving.
+    public static let realtimeSlider: WidgetCommandPolicy = .throttle(.milliseconds(500))
     public static let colorPicker: WidgetCommandPolicy = .debounce(.milliseconds(200))
     public static let immediate: WidgetCommandPolicy = .immediate
     public static let finalOnly: WidgetCommandPolicy = .finalOnly
@@ -39,6 +44,9 @@ public enum WidgetCommandPhase: Sendable {
 public enum WidgetCommandPolicy: Sendable {
     case immediate
     case debounce(Duration)
+    /// Sends the first change immediately, then the newest change once per interval
+    /// while newer values keep arriving.
+    case throttle(Duration)
     /// Dispatches only when phase is `.release`.
     case finalOnly
     /// Dispatches only for `.press` and `.release` phases.

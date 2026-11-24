@@ -31,6 +31,8 @@ class SitemapPageViewModel: ObservableObject {
     @Published var openHABRootUrl: String?
     @Published var showSearchField = false
     @Published var commandStates: [String: WidgetCommandLifecycleState] = [:]
+    /// Active home's Real-time Sliders setting. Sliders read this while the thumb is moving.
+    @Published private(set) var realTimeSliders = false
     @Published private(set) var trackerStatus: NetworkStatus = .stopped
     @Published var widgetUpdateVersions: [String: Int] = [:]
     @Published private(set) var rowInputs: [SitemapRowInput] = []
@@ -198,7 +200,11 @@ class SitemapPageViewModel: ObservableObject {
         preferencesObserverTask = Task { [weak self] in
             for await prefs in await Preferences.shared.currentHomePreferencesStream {
                 await MainActor.run { [weak self] in
-                    guard let self, !self.isLinkedPage else { return }
+                    guard let self else { return }
+                    realTimeSliders = prefs.realTimeSliders
+                    // Linked pages keep the sitemap the caller opened. The preference above
+                    // still applies, because those pages show sliders too.
+                    guard !isLinkedPage else { return }
                     let newSitemap = prefs.defaultSitemap
                     guard !newSitemap.isEmpty, newSitemap != defaultSitemap else { return }
                     defaultSitemap = newSitemap

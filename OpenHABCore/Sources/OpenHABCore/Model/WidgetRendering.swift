@@ -167,6 +167,12 @@ public extension WidgetRendering {
         return itemState
     }
 
+    /// Whether the item type sends commands while a slider thumb moves, before the
+    /// Real-time Sliders preference is applied.
+    ///
+    /// Sitemap `releaseOnly` wins: `true` sends only on release, `false` sends during the drag.
+    /// When `releaseOnly` is omitted, dimmer, number, color, and percent items allow live updates.
+    /// Call ``shouldUseSliderUpdatesDuringMove(realTimeSliders:)`` to apply the user preference.
     func shouldUseSliderUpdatesDuringMove() -> Bool {
         if let releaseOnly {
             return !releaseOnly
@@ -181,6 +187,19 @@ public extension WidgetRendering {
             return stateValueAsNumberState?.unit == "%"
         }
         return false
+    }
+
+    /// Live slider updates after applying the Real-time Sliders preference.
+    ///
+    /// An explicit sitemap `releaseOnly` is not affected by the preference.
+    /// When the sitemap omits it, live updates require both the preference and an item type
+    /// that ``shouldUseSliderUpdatesDuringMove()`` allows.
+    func shouldUseSliderUpdatesDuringMove(realTimeSliders: Bool) -> Bool {
+        if releaseOnly != nil {
+            return shouldUseSliderUpdatesDuringMove()
+        }
+        guard realTimeSliders else { return false }
+        return shouldUseSliderUpdatesDuringMove()
     }
 
     func mappingIndex(byCommand command: String?) -> Int? {

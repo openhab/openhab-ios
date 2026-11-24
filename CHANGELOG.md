@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- fix(sitemap): send one slider command on release (#1387)
+
 ## [Version 3.4.42, Build 340] - 2026-11-18Z
 
 - Cleaning up CHANGELOG.md
