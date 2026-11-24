@@ -678,6 +678,7 @@ extension SitemapRowInputMapper {
             labelColor: snapshot.labelColor,
             valueColor: snapshot.valueColor,
             shouldSendUpdatesDuringMove: snapshot.shouldUseSliderUpdatesDuringMove(),
+            liveUpdatesFollowPreference: snapshot.releaseOnly == nil,
             serverValue: adjustedToStep(serverValue, displayState: displayState),
             icon: rowIconInput(from: snapshot),
             itemName: snapshot.item?.name

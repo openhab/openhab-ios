@@ -38,4 +38,46 @@ struct WidgetCommandDispatcherTests {
 
         #expect(callCount == 0)
     }
+
+    @Test("Throttle sends the first value immediately and the latest value on the interval")
+    func throttleSendsWhileValuesKeepArriving() async {
+        let dispatcher = WidgetCommandDispatcher()
+        var commands: [String] = []
+        let policy = WidgetCommandPolicy.throttle(.milliseconds(60))
+
+        func send(_ command: String) {
+            dispatcher.send(command, for: "Dimmer", policy: policy, key: "slider") { _, sent in
+                commands.append(sent)
+            }
+        }
+
+        send("10")
+        send("20")
+        send("30")
+        #expect(commands == ["10"])
+
+        try? await Task.sleep(for: .milliseconds(400))
+        #expect(commands == ["10", "30"])
+
+        send("55")
+        #expect(commands == ["10", "30", "55"])
+    }
+
+    @Test("Cancelling a throttle drops the value that has not been sent yet")
+    func throttleCancelDropsTheUnsentValue() async {
+        let dispatcher = WidgetCommandDispatcher()
+        var commands: [String] = []
+        let policy = WidgetCommandPolicy.throttle(.milliseconds(60))
+
+        dispatcher.send("10", for: "Dimmer", policy: policy, key: "slider") { _, sent in
+            commands.append(sent)
+        }
+        dispatcher.send("40", for: "Dimmer", policy: policy, key: "slider") { _, sent in
+            commands.append(sent)
+        }
+        dispatcher.cancelPending(for: "Dimmer", key: "slider")
+
+        try? await Task.sleep(for: .milliseconds(400))
+        #expect(commands == ["10"])
+    }
 }
