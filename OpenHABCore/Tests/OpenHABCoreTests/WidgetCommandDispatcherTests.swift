@@ -51,15 +51,25 @@ struct WidgetCommandDispatcherTests {
             }
         }
 
+        func waitUntil(_ expected: [String]) async {
+            let deadline = ContinuousClock.now.advanced(by: .seconds(2))
+            while commands != expected, ContinuousClock.now < deadline {
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+        }
+
         send("10")
         send("20")
         send("30")
         #expect(commands == ["10"])
 
-        try? await Task.sleep(for: .milliseconds(400))
+        // The trailing value waits for the open interval. A fixed sleep can
+        // return before that interval has fired on a busy runner.
+        await waitUntil(["10", "30"])
         #expect(commands == ["10", "30"])
 
         send("55")
+        await waitUntil(["10", "30", "55"])
         #expect(commands == ["10", "30", "55"])
     }
 
